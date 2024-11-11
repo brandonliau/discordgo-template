@@ -1,9 +1,8 @@
 package manager
 
 import (
-	"log"
-
 	"DiscordTemplate/pkg/command"
+	"DiscordTemplate/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -11,11 +10,13 @@ import (
 type sessionManager struct {
 	session  *discordgo.Session
 	commands map[string]command.Command
+	logger logger.Logger
 }
 
-func NewSessionManager(s *discordgo.Session) *sessionManager {
+func NewSessionManager(s *discordgo.Session, logger logger.Logger) *sessionManager {
 	return &sessionManager{
 		session:  s,
+		logger: logger,
 		commands: make(map[string]command.Command),
 	}
 }
@@ -37,25 +38,25 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		if command, ok := m.commands[i.ApplicationCommandData().Name]; ok {
 			rd, err := command.Execute(cmdArgs)
 			if err != nil {
-				log.Printf("[ERROR] Failed to execute %s: %v", command.GetCommand().Name, err)
+				m.logger.Error("Failed to execute %s: %v", command.GetCommand().Name, err)
 			}
 			err = m.SendResponse(i, rd)
 			if err != nil {
-				log.Printf("[ERROR] Failed to message user %s: %v", userID, err)
+				m.logger.Warn("Failed to message user %s: %v", userID, err)
 			}
 		}
-		log.Printf("[INFO] %s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
+		m.logger.Debug("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
 	}
 }
 
 func (m *sessionManager) RegisterCommand(c command.Command) {
 	cname := c.GetCommand().Name
 	if _, ok := m.commands[cname]; ok {
-		log.Printf("[ERROR] Application command %s already registered", cname)
+		m.logger.Error("Application command %s already registered", cname)
 	}
 	_, err := m.session.ApplicationCommandCreate(m.session.State.User.ID, "", c.GetCommand())
 	if err != nil {
-		log.Printf("[ERROR] Failed to add application command %s : %v", cname, err)
+		m.logger.Error("Failed to add application command %s : %v", cname, err)
 	}
 	m.commands[cname] = c
 }

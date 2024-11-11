@@ -2,25 +2,28 @@ package database
 
 import (
 	"database/sql"
-	"log"
+
+	"DiscordTemplate/pkg/logger"
 )
 
 type sqliteDB struct {
 	db *sql.DB
+	logger logger.Logger
 }
 
-func NewSqliteDB() *sqliteDB {
+func NewSqliteDB(logger logger.Logger) *sqliteDB {
 	db, err := sql.Open("sqlite", "./database.db")
 	if err != nil {
-		log.Fatalf("[FATAL] Failed to connect to database: %v", err)
+		logger.Fatal("Failed to connect to database: %v", err)
 	}
 	db.SetMaxOpenConns(1)
 	sqlitedb := &sqliteDB{
 		db: db,
+		logger: logger,
 	}
 	err = sqlitedb.InitDB()
 	if err != nil {
-		log.Printf("[ERROR] Failed to initialize database: %v", err)
+		logger.Warn("Failed to initialize database: %v", err)
 	}
 	return sqlitedb
 }
@@ -37,7 +40,7 @@ func (s *sqliteDB) InitDB() error {
 func (s *sqliteDB) Close() {
 	err := s.db.Close()
 	if err != nil {
-		log.Printf("[ERROR] Failed to close database connection")
+		s.logger.Error("Failed to close database connection")
 	}
 }
 

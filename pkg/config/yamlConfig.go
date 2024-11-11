@@ -2,25 +2,29 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"DiscordTemplate/pkg/logger"
 
 	"gopkg.in/yaml.v3"
 )
 
 type yamlConfig struct {
 	Token string
+	logger logger.Logger
 }
 
-func NewYamlConfig(file string) *yamlConfig {
-	cfg := &yamlConfig{}
+func NewYamlConfig(file string, logger logger.Logger) *yamlConfig {
+	cfg := &yamlConfig{
+		logger: logger,
+	}
 	err := cfg.loadConfig(file)
 	if err != nil {
-		log.Fatalf("[FATAL] Failed to load config file: %v", err)
+		logger.Fatal("Failed to load config file: %v", err)
 	}
 	err = cfg.validateConfig()
 	if err != nil {
-		log.Fatalf("[FATAL] Failed to validate config file: %v", err)
+		logger.Fatal("Failed to validate config file: %v", err)
 	}
 	return cfg
 }

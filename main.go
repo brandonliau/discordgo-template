@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +9,7 @@ import (
 	"DiscordTemplate/pkg/command"
 	"DiscordTemplate/pkg/config"
 	"DiscordTemplate/pkg/database"
+	"DiscordTemplate/pkg/logger"
 	"DiscordTemplate/pkg/manager"
 	_ "DiscordTemplate/pkg/service"
 
@@ -18,16 +18,17 @@ import (
 )
 
 func main() {
-	cfg := config.NewYamlConfig("config.yml")
-	db := database.NewSqliteDB()
+	logger := logger.NewStdLogger(logger.LevelDebug)
+	cfg := config.NewYamlConfig("config.yml", logger)
+	db := database.NewSqliteDB(logger)
 	defer db.Close()
 	
 	// Create new discord session
 	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
-		log.Fatalf("[FATAL] Failed to create discord session : %v", err)
+		logger.Fatal("Failed to create discord session : %v", err)
 	}
-	m := manager.NewSessionManager(s)
+	m := manager.NewSessionManager(s, logger)
 
 	// Identify intents and add handlers
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
@@ -36,7 +37,7 @@ func main() {
 	// Establish websocket connection
 	err = s.Open()
 	if err != nil {
-		log.Fatalf("[FATAL] Failed to establish websocket connection : %v", err)
+		logger.Fatal("Failed to establish websocket connection : %v", err)
 	}
 	defer s.Close()
 
@@ -46,7 +47,7 @@ func main() {
 	m.RegisterCommand(command.NewWriteCommand(db))
 	m.RegisterCommand(command.NewRemoveCommand(db))
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
-	log.Println("[INFO] Bot running")
+	logger.Info("Bot running")
 
 	// Create stop channel
 	sc := make(chan os.Signal, 1)
@@ -56,7 +57,7 @@ func main() {
 	// Remove application commands
 	_, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)
 	if err != nil {
-		log.Printf("[ERROR] Failed to delete application commands")
+		logger.Error("Failed to delete application commands")
 	}
-	log.Println("[INFO] Bot shut down")
+	logger.Info("Bot shut down")
 }
