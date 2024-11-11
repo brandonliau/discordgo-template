@@ -47,10 +47,10 @@ func EphemeralEmbedResponse(e *discordgo.MessageEmbed) *discordgo.InteractionRes
 	}
 }
 
-func ParseInteractionOptions(opts discordgo.ApplicationCommandInteractionData) map[string]string {
-	icd := make(map[string]string)
-	for _, opt := range opts.Options {
-		icd[opt.Name] = opt.Value.(string)
+func ParseInteractionOptions(cid discordgo.ApplicationCommandInteractionData) map[string]string {
+	opts := make(map[string]string)
+	for _, opt := range cid.Options {
+		opts[opt.Name] = opt.Value.(string)
 	}
-	return icd
+	return opts
 }

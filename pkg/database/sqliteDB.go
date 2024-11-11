@@ -37,7 +37,7 @@ func (s *sqliteDB) InitDB() error {
 func (s *sqliteDB) Close() {
 	err := s.db.Close()
 	if err != nil {
-		log.Printf("[INFO] Failed to close database connection")
+		log.Printf("[ERROR] Failed to close database connection")
 	}
 }
 

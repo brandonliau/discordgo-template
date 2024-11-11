@@ -34,8 +34,8 @@ func (c *writeCommand) GetCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *writeCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
-	icd := ParseInteractionOptions(args.Interaction.ApplicationCommandData())
-	secret := icd["data"]
+	opts := ParseInteractionOptions(args.Interaction.ApplicationCommandData())
+	secret := opts["data"]
 	err := c.db.Write(args.UserID, secret)
 	if err != nil {
 		return nil, err

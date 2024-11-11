@@ -22,7 +22,6 @@ func NewYamlConfig(file string) *yamlConfig {
 	if err != nil {
 		log.Fatalf("[FATAL] Failed to validate config file: %v", err)
 	}
-
 	return cfg
 }
 
