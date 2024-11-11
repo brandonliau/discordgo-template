@@ -21,7 +21,7 @@ func NewWriteCommand(db database.Database) *writeCommand {
 func (c *writeCommand) GetCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "write",
-		Description: "Write to database.",
+		Description: "Write secret to database.",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
