@@ -5,17 +5,20 @@ import (
 	"time"
 
 	"DiscordTemplate/pkg/database"
+	"DiscordTemplate/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 type retrieveCommand struct {
-	db database.Database
+	db     database.Database
+	logger logger.Logger
 }
 
-func NewRetrieveCommand(db database.Database) *retrieveCommand {
+func NewRetrieveCommand(db database.Database, logger logger.Logger) *retrieveCommand {
 	return &retrieveCommand{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
@@ -31,10 +34,14 @@ func (c *retrieveCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponse
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var secret string
 	var secrets []string
 	for rows.Next() {
-		rows.Scan(&secret)
+		err := rows.Scan(&secret)
+		if err != nil {
+			c.logger.Warn("Failed to scan row", err)
+		}
 		secrets = append(secrets, secret)
 	}
 	embed := c.retrieveEmbed(secrets...)
@@ -55,9 +62,9 @@ func (c *retrieveCommand) retrieveEmbed(secrets ...string) *discordgo.MessageEmb
 	}
 	desc = desc[:len(desc)-1]
 	return &discordgo.MessageEmbed{
-		Title: "Secrets",
+		Title:       "Secrets",
 		Description: desc,
-		Color: blue,
+		Color:       blue,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time.Now().Format("01/02/2006 03:04:05 PM"),
 		},

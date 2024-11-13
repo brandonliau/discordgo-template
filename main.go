@@ -50,7 +50,7 @@ func main() {
 	m.RegisterCommand(command.NewUptimeCommand(time.Now().Unix()))
 	m.RegisterCommand(command.NewAddCommand(db))
 	m.RegisterCommand(command.NewClearCommand(db))
-	m.RegisterCommand(command.NewRetrieveCommand(db))
+	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
 	logger.Info("Bot running")
 
