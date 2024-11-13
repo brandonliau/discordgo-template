@@ -12,7 +12,7 @@ func NewPingCommand() *pingCommand {
 	return &pingCommand{}
 }
 
-func (c *pingCommand) GetCommand() *discordgo.ApplicationCommand {
+func (c *pingCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "ping",
 		Description: "Check bot latency.",

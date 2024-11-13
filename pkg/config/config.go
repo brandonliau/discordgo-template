@@ -1,6 +1,6 @@
 package config
 
 type Config interface {
-	loadConfig(string) error
-	validateConfig() error
+	load(string) error
+	validate() error
 }

@@ -17,7 +17,7 @@ func NewUptimeCommand(start int64) *uptimeCommand {
 	}
 }
 
-func (c *uptimeCommand) GetCommand() *discordgo.ApplicationCommand {
+func (c *uptimeCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "uptime",
 		Description: "Check bot uptime.",

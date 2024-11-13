@@ -22,7 +22,7 @@ func main() {
 	cfg := config.NewYamlConfig("config.yml", logger)
 	db := database.NewSqliteDB(logger)
 	defer db.Close()
-	
+
 	// Create new discord session
 	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {

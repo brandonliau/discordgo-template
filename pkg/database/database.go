@@ -1,8 +1,8 @@
 package database
 
 type Database interface {
-	InitDB() error
 	Close()
+	Migrate() error
 	Write(userID string, secret string) error
 	Remove(userID string) error
 }

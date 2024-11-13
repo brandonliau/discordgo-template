@@ -18,7 +18,7 @@ func NewWriteCommand(db database.Database) *writeCommand {
 	}
 }
 
-func (c *writeCommand) GetCommand() *discordgo.ApplicationCommand {
+func (c *writeCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "write",
 		Description: "Write secret to database.",

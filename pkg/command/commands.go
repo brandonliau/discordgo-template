@@ -11,7 +11,7 @@ const (
 )
 
 type Command interface {
-	GetCommand() *discordgo.ApplicationCommand
+	Command() *discordgo.ApplicationCommand
 	Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error)
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 type yamlConfig struct {
-	Token string
+	Token  string
 	logger logger.Logger
 }
 
@@ -18,18 +18,18 @@ func NewYamlConfig(file string, logger logger.Logger) *yamlConfig {
 	cfg := &yamlConfig{
 		logger: logger,
 	}
-	err := cfg.loadConfig(file)
+	err := cfg.load(file)
 	if err != nil {
 		logger.Fatal("Failed to load config file: %v", err)
 	}
-	err = cfg.validateConfig()
+	err = cfg.validate()
 	if err != nil {
 		logger.Fatal("Failed to validate config file: %v", err)
 	}
 	return cfg
 }
 
-func (c *yamlConfig) loadConfig(file string) error {
+func (c *yamlConfig) load(file string) error {
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (c *yamlConfig) loadConfig(file string) error {
 	return nil
 }
 
-func (c *yamlConfig) validateConfig() error {
+func (c *yamlConfig) validate() error {
 	if c.Token == "" {
 		return fmt.Errorf("empty token")
 	}

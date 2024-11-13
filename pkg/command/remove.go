@@ -16,7 +16,7 @@ func NewRemoveCommand(db database.Database) *removeCommand {
 	}
 }
 
-func (c *removeCommand) GetCommand() *discordgo.ApplicationCommand {
+func (c *removeCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "remove",
 		Description: "Remove secrets from database.",

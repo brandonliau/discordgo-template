@@ -2,6 +2,6 @@ package service
 
 type coreService struct{}
 
-func NewServiceData(s int64) *coreService {
+func NewServiceData() *coreService {
 	return &coreService{}
 }

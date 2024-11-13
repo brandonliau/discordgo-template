@@ -7,7 +7,7 @@ import (
 )
 
 type sqliteDB struct {
-	db *sql.DB
+	db     *sql.DB
 	logger logger.Logger
 }
 
@@ -18,23 +18,14 @@ func NewSqliteDB(logger logger.Logger) *sqliteDB {
 	}
 	db.SetMaxOpenConns(1)
 	sqlitedb := &sqliteDB{
-		db: db,
+		db:     db,
 		logger: logger,
 	}
-	err = sqlitedb.InitDB()
+	err = sqlitedb.Migrate()
 	if err != nil {
 		logger.Warn("Failed to initialize database: %v", err)
 	}
 	return sqlitedb
-}
-
-func (s *sqliteDB) InitDB() error {
-	query := "CREATE TABLE IF NOT EXISTS userdata (userID TEXT, secret TEXT)"
-	_, err := s.db.Exec(query)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s *sqliteDB) Close() {
@@ -42,6 +33,15 @@ func (s *sqliteDB) Close() {
 	if err != nil {
 		s.logger.Error("Failed to close database connection")
 	}
+}
+
+func (s *sqliteDB) Migrate() error {
+	query := "CREATE TABLE IF NOT EXISTS userdata (userID TEXT, secret TEXT)"
+	_, err := s.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *sqliteDB) Write(userID string, secret string) error {

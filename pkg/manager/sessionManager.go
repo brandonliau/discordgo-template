@@ -10,13 +10,13 @@ import (
 type sessionManager struct {
 	session  *discordgo.Session
 	commands map[string]command.Command
-	logger logger.Logger
+	logger   logger.Logger
 }
 
 func NewSessionManager(s *discordgo.Session, logger logger.Logger) *sessionManager {
 	return &sessionManager{
 		session:  s,
-		logger: logger,
+		logger:   logger,
 		commands: make(map[string]command.Command),
 	}
 }
@@ -38,7 +38,7 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		if command, ok := m.commands[i.ApplicationCommandData().Name]; ok {
 			rd, err := command.Execute(cmdArgs)
 			if err != nil {
-				m.logger.Error("Failed to execute %s: %v", command.GetCommand().Name, err)
+				m.logger.Error("Failed to execute %s: %v", command.Command().Name, err)
 			}
 			err = m.SendResponse(i, rd)
 			if err != nil {
@@ -50,11 +50,11 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 }
 
 func (m *sessionManager) RegisterCommand(c command.Command) {
-	cname := c.GetCommand().Name
+	cname := c.Command().Name
 	if _, ok := m.commands[cname]; ok {
 		m.logger.Error("Application command %s already registered", cname)
 	}
-	_, err := m.session.ApplicationCommandCreate(m.session.State.User.ID, "", c.GetCommand())
+	_, err := m.session.ApplicationCommandCreate(m.session.State.User.ID, "", c.Command())
 	if err != nil {
 		m.logger.Error("Failed to add application command %s : %v", cname, err)
 	}
