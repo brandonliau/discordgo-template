@@ -21,34 +21,6 @@ func NewSessionManager(s *discordgo.Session, logger logger.Logger) *sessionManag
 	}
 }
 
-func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	var userID string
-	if i.Member != nil {
-		userID = i.Member.User.ID
-	} else {
-		userID = i.User.ID
-	}
-	cmdArgs := &command.CmdArgs{
-		Session:     s,
-		Interaction: i,
-		UserID:      userID,
-	}
-	switch i.Type {
-	case discordgo.InteractionApplicationCommand:
-		if command, ok := m.commands[i.ApplicationCommandData().Name]; ok {
-			rd, err := command.Execute(cmdArgs)
-			if err != nil {
-				m.logger.Error("Failed to execute %s: %v", command.Command().Name, err)
-			}
-			err = m.SendResponse(i, rd)
-			if err != nil {
-				m.logger.Warn("Failed to message user %s: %v", userID, err)
-			}
-		}
-		m.logger.Debug("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
-	}
-}
-
 func (m *sessionManager) RegisterCommand(c command.Command) {
 	cname := c.Command().Name
 	if _, ok := m.commands[cname]; ok {

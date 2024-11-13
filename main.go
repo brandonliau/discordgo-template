@@ -33,6 +33,10 @@ func main() {
 	// Identify intents and add handlers
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	s.AddHandler(m.InteractionHandler)
+	s.AddHandler(m.ConnectHandler)
+	s.AddHandler(m.ReadyHandler)
+	s.AddHandler(m.ResumedHandler)
+	s.AddHandler(m.RateLimitHandler)
 
 	// Establish websocket connection
 	err = s.Open()
