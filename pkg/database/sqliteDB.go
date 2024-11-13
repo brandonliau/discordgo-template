@@ -44,18 +44,16 @@ func (s *sqliteDB) Migrate() error {
 	return nil
 }
 
-func (s *sqliteDB) Write(userID string, secret string) error {
-	query := "INSERT INTO userdata (userID, secret) VALUES (?, ?)"
-	_, err := s.db.Exec(query, userID, secret)
+func (s *sqliteDB) Query(query string, args ...any) (*sql.Rows, error) {
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return rows, nil
 }
 
-func (s *sqliteDB) Remove(userID string) error {
-	query := "DELETE FROM userdata WHERE userID = ?"
-	_, err := s.db.Exec(query, userID)
+func (s *sqliteDB) Exec(query string, args ...any) error {
+	_, err := s.db.Exec(query, args...)
 	if err != nil {
 		return err
 	}

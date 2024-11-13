@@ -48,8 +48,9 @@ func main() {
 	// Register application commands
 	m.RegisterCommand(command.NewPingCommand())
 	m.RegisterCommand(command.NewUptimeCommand(time.Now().Unix()))
-	m.RegisterCommand(command.NewWriteCommand(db))
-	m.RegisterCommand(command.NewRemoveCommand(db))
+	m.RegisterCommand(command.NewAddCommand(db))
+	m.RegisterCommand(command.NewClearCommand(db))
+	m.RegisterCommand(command.NewRetrieveCommand(db))
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
 	logger.Info("Bot running")
 

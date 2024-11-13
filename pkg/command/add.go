@@ -8,20 +8,20 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type writeCommand struct {
+type addCommand struct {
 	db database.Database
 }
 
-func NewWriteCommand(db database.Database) *writeCommand {
-	return &writeCommand{
+func NewAddCommand(db database.Database) *addCommand {
+	return &addCommand{
 		db: db,
 	}
 }
 
-func (c *writeCommand) Command() *discordgo.ApplicationCommand {
+func (c *addCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "write",
-		Description: "Write secret to database.",
+		Name:        "add",
+		Description: "Add a secret to the database.",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -33,13 +33,13 @@ func (c *writeCommand) Command() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *writeCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *addCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
 	opts := ParseInteractionOptions(args.Interaction.ApplicationCommandData())
 	secret := opts["data"]
-	err := c.db.Write(args.UserID, secret)
+	err := c.db.Exec("INSERT INTO userdata (userID, secret) VALUES (?, ?)", args.UserID, secret)
 	if err != nil {
 		return nil, err
 	}
-	rsp := EphemeralContentResponse(fmt.Sprintf("Wrote `%s` to database.", secret))
+	rsp := EphemeralContentResponse(fmt.Sprintf("Added `%s` to database.", secret))
 	return rsp, nil
 }
