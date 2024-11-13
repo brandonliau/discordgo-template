@@ -8,10 +8,10 @@ import (
 )
 
 // Helper function to create a StdLogger with an in-memory buffer
-func createLoggerWithBuffer(level int) (*StdLogger, *bytes.Buffer) {
+func createLoggerWithBuffer(level int) (*stdLogger, *bytes.Buffer) {
 	buf := &bytes.Buffer{}
 	logger := log.New(buf, "", log.Ldate|log.Ltime)
-	return &StdLogger{level: level, logger: logger}, buf
+	return &stdLogger{level: level, logger: logger}, buf
 }
 
 func TestDebug(t *testing.T) {
