@@ -19,6 +19,7 @@ import (
 )
 
 func main() {
+	// Create logger, config, and database
 	logger := logger.NewStdLogger(logger.LevelDebug)
 	cfg := config.NewYamlConfig("config.yml", logger)
 	db := database.NewSqliteDB(logger)
@@ -29,11 +30,13 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to create discord session : %v", err)
 	}
-	ntfr := notifier.NewDiscordNotifier(s)
-	m := manager.NewSessionManager(s, logger, ntfr)
-
-	// Identify intents and add handlers
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+	
+	// Create notifier and session manager
+	notifier := notifier.NewDiscordNotifier(s)
+	m := manager.NewSessionManager(s, logger, notifier)
+
+	// Add event handlers
 	s.AddHandler(m.InteractionHandler)
 	s.AddHandler(m.ConnectHandler)
 	s.AddHandler(m.ReadyHandler)
@@ -53,10 +56,12 @@ func main() {
 	m.RegisterCommand(command.NewAddCommand(db))
 	m.RegisterCommand(command.NewClearCommand(db))
 	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
+	
+	// Update bot personalization
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
 	logger.Info("Bot running")
 
-	// Create stop channel
+	// Create stop channel and block execution until a stop signal is received
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-sc
