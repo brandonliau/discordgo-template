@@ -11,6 +11,7 @@ import (
 	"DiscordTemplate/pkg/database"
 	"DiscordTemplate/pkg/logger"
 	"DiscordTemplate/pkg/manager"
+	"DiscordTemplate/pkg/notifier"
 	_ "DiscordTemplate/pkg/service"
 
 	"github.com/bwmarrin/discordgo"
@@ -28,7 +29,8 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to create discord session : %v", err)
 	}
-	m := manager.NewSessionManager(s, logger)
+	ntfr := notifier.NewDiscordNotifier(s)
+	m := manager.NewSessionManager(s, logger, ntfr)
 
 	// Identify intents and add handlers
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
