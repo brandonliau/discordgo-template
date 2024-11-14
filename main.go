@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"DiscordTemplate/pkg/command"
+	"DiscordTemplate/pkg/component"
 	"DiscordTemplate/pkg/config"
 	"DiscordTemplate/pkg/database"
 	"DiscordTemplate/pkg/logger"
@@ -31,7 +32,7 @@ func main() {
 		logger.Fatal("Failed to create discord session : %v", err)
 	}
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
-	
+
 	// Create notifier and session manager
 	notifier := notifier.NewDiscordNotifier(s)
 	m := manager.NewSessionManager(s, logger, notifier)
@@ -56,7 +57,10 @@ func main() {
 	m.RegisterCommand(command.NewAddCommand(db))
 	m.RegisterCommand(command.NewClearCommand(db))
 	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
-	
+
+	// Register application components
+	m.RegisterComponent(component.NewLinkComponent())
+
 	// Update bot personalization
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
 	logger.Info("Bot running")
