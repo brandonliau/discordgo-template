@@ -5,6 +5,7 @@ import (
 	"DiscordTemplate/pkg/component"
 	"DiscordTemplate/pkg/logger"
 	"DiscordTemplate/pkg/notifier"
+	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -54,7 +55,7 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	} else {
 		userID = i.User.ID
 	}
-	cmdArgs := &command.CmdArgs{
+	cmdArgs := &shared.CmdArgs{
 		Session:     s,
 		Interaction: i,
 		UserID:      userID,
@@ -68,6 +69,7 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if err != nil {
 				m.logger.Error("Failed to execute %s: %v", command.Command().Name, err)
 			}
+			m.logger.Debug("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
 		}
 	case discordgo.InteractionMessageComponent:
 		if component, ok := m.components[i.MessageComponentData().CustomID]; ok {
@@ -75,9 +77,9 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if err != nil {
 				m.logger.Error("Failed to execute %s: %v", component.CustomID(), err)
 			}
+			m.logger.Debug("%s executed %s", cmdArgs.UserID, component.CustomID())
 		}
 	}
-	m.logger.Debug("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
 	err = m.notifier.SendResponse(i, rd)
 	if err != nil {
 		m.logger.Error("Failed to respond to user %s: %v", userID, err)

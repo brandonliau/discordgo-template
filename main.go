@@ -57,9 +57,10 @@ func main() {
 	m.RegisterCommand(command.NewAddCommand(db))
 	m.RegisterCommand(command.NewClearCommand(db))
 	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
+	m.RegisterCommand(command.NewButtonCommand())
 
 	// Register application components
-	m.RegisterComponent(component.NewLinkComponent())
+	m.RegisterComponent(component.NewPingComponent())
 
 	// Update bot personalization
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")

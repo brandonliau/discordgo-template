@@ -1,7 +1,7 @@
 package component
 
 import (
-	"DiscordTemplate/pkg/command"
+	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -9,5 +9,5 @@ import (
 type Component interface {
 	CustomID() string
 	Component() discordgo.MessageComponent
-	Execute(args *command.CmdArgs) (*discordgo.InteractionResponseData, error)
+	Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error)
 }

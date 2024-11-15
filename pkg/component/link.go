@@ -1,7 +1,7 @@
 package component
 
 import (
-	"DiscordTemplate/pkg/command"
+	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -24,6 +24,6 @@ func (c *linkComponent) Component() discordgo.MessageComponent {
 	}
 }
 
-func (c *linkComponent) Execute(args *command.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *linkComponent) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
 	return nil, nil
 }

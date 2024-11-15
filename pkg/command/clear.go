@@ -2,6 +2,7 @@ package command
 
 import (
 	"DiscordTemplate/pkg/database"
+	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -23,11 +24,11 @@ func (c *clearCommand) Command() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *clearCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *clearCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
 	err := c.db.Exec("DELETE FROM userdata WHERE userID = ?", args.UserID)
 	if err != nil {
 		return nil, err
 	}
-	rsp := EphemeralContentResponse("Removed all secrets from database.")
+	rsp := shared.EphemeralContentResponse("Removed all secrets from database.")
 	return rsp, nil
 }

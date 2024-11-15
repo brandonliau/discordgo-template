@@ -6,6 +6,7 @@ import (
 
 	"DiscordTemplate/pkg/database"
 	"DiscordTemplate/pkg/logger"
+	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -29,7 +30,7 @@ func (c *retrieveCommand) Command() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *retrieveCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
 	rows, err := c.db.Query("SELECT secret FROM userdata WHERE userID = ?", args.UserID)
 	if err != nil {
 		return nil, err
@@ -45,9 +46,9 @@ func (c *retrieveCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponse
 		secrets = append(secrets, secret)
 	}
 	embed := c.retrieveEmbed(secrets...)
-	rsp := EphemeralContentResponse("No secrets found for user.")
+	rsp := shared.EphemeralContentResponse("No secrets found for user.")
 	if embed != nil {
-		rsp = EphemeralEmbedResponse(c.retrieveEmbed(secrets...))
+		rsp = shared.EphemeralEmbedResponse(c.retrieveEmbed(secrets...))
 	}
 	return rsp, nil
 }

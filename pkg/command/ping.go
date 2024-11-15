@@ -3,6 +3,8 @@ package command
 import (
 	"fmt"
 
+	"DiscordTemplate/pkg/shared"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -19,7 +21,7 @@ func (c *pingCommand) Command() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *pingCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
-	rsp := EphemeralContentResponse(fmt.Sprintf("Pong! `%d ms`", args.Session.HeartbeatLatency().Milliseconds()))
+func (c *pingCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+	rsp := shared.EphemeralContentResponse(fmt.Sprintf("Pong! `%d ms`", args.Session.HeartbeatLatency().Milliseconds()))
 	return rsp, nil
 }

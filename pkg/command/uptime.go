@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"DiscordTemplate/pkg/shared"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -24,8 +26,8 @@ func (c *uptimeCommand) Command() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *uptimeCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
-	rsp := EphemeralEmbedResponse(c.uptimeEmbed())
+func (c *uptimeCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+	rsp := shared.EphemeralEmbedResponse(c.uptimeEmbed())
 	return rsp, nil
 }
 

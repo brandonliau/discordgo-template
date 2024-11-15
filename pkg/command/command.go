@@ -1,6 +1,8 @@
 package command
 
 import (
+	"DiscordTemplate/pkg/shared"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -12,39 +14,7 @@ const (
 
 type Command interface {
 	Command() *discordgo.ApplicationCommand
-	Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error)
-}
-
-type CmdArgs struct {
-	Session     *discordgo.Session
-	Interaction *discordgo.InteractionCreate
-	UserID      string
-}
-
-func ContentResponse(c string) *discordgo.InteractionResponseData {
-	return &discordgo.InteractionResponseData{
-		Content: c,
-	}
-}
-
-func EphemeralContentResponse(c string) *discordgo.InteractionResponseData {
-	return &discordgo.InteractionResponseData{
-		Flags:   discordgo.MessageFlagsEphemeral,
-		Content: c,
-	}
-}
-
-func EmbedResponse(e *discordgo.MessageEmbed) *discordgo.InteractionResponseData {
-	return &discordgo.InteractionResponseData{
-		Embeds: []*discordgo.MessageEmbed{e},
-	}
-}
-
-func EphemeralEmbedResponse(e *discordgo.MessageEmbed) *discordgo.InteractionResponseData {
-	return &discordgo.InteractionResponseData{
-		Flags:  discordgo.MessageFlagsEphemeral,
-		Embeds: []*discordgo.MessageEmbed{e},
-	}
+	Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error)
 }
 
 func ParseInteractionOptions(cid discordgo.ApplicationCommandInteractionData) map[string]string {

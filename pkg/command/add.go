@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"DiscordTemplate/pkg/database"
+	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -33,13 +34,13 @@ func (c *addCommand) Command() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *addCommand) Execute(args *CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *addCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
 	opts := ParseInteractionOptions(args.Interaction.ApplicationCommandData())
 	secret := opts["data"]
 	err := c.db.Exec("INSERT INTO userdata (userID, secret) VALUES (?, ?)", args.UserID, secret)
 	if err != nil {
 		return nil, err
 	}
-	rsp := EphemeralContentResponse(fmt.Sprintf("Added `%s` to database.", secret))
+	rsp := shared.EphemeralContentResponse(fmt.Sprintf("Added `%s` to database.", secret))
 	return rsp, nil
 }
