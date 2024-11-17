@@ -9,13 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type yamlConfig struct {
+type discordConfig struct {
 	Token  string
 	logger logger.Logger
 }
 
-func NewYamlConfig(file string, logger logger.Logger) *yamlConfig {
-	cfg := &yamlConfig{
+func NewDiscordConfig(file string, logger logger.Logger) *discordConfig {
+	cfg := &discordConfig{
 		logger: logger,
 	}
 	err := cfg.load(file)
@@ -29,7 +29,7 @@ func NewYamlConfig(file string, logger logger.Logger) *yamlConfig {
 	return cfg
 }
 
-func (c *yamlConfig) load(file string) error {
+func (c *discordConfig) load(file string) error {
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (c *yamlConfig) load(file string) error {
 	return nil
 }
 
-func (c *yamlConfig) validate() error {
+func (c *discordConfig) validate() error {
 	if c.Token == "" {
 		return fmt.Errorf("empty token")
 	}

@@ -31,7 +31,7 @@ func (c *buttonCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionRes
 func (c *buttonCommand) buttonEmbed() *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Buttons",
-		Description: "Here are some buttons",
+		Description: "Here are some sample buttons",
 		Color:       blue,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time.Now().Format("01/02/2006 03:04:05 PM"),

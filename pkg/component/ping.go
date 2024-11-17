@@ -15,14 +15,14 @@ func NewPingComponent() *pingComponent {
 }
 
 func (c *pingComponent) CustomID() string {
-	return "c_ping"
+	return c.Component().(discordgo.Button).CustomID
 }
 
 func (c *pingComponent) Component() discordgo.MessageComponent {
 	return discordgo.Button{
 		Label:    "Ping",
 		Style:    discordgo.PrimaryButton,
-		CustomID: "c_ping",
+		CustomID: "component_ping",
 	}
 }
 

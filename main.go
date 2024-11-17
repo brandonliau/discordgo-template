@@ -22,7 +22,7 @@ import (
 func main() {
 	// Create logger, config, and database
 	logger := logger.NewStdLogger(logger.LevelDebug)
-	cfg := config.NewYamlConfig("config.yml", logger)
+	cfg := config.NewDiscordConfig("config.yml", logger)
 	db := database.NewSqliteDB(logger)
 	defer db.Close()
 

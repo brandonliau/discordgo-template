@@ -12,10 +12,6 @@ func NewLinkComponent() *linkComponent {
 	return &linkComponent{}
 }
 
-func (c *linkComponent) CustomID() string {
-	return "github"
-}
-
 func (c *linkComponent) Component() discordgo.MessageComponent {
 	return discordgo.Button{
 		Label: "GitHub",
