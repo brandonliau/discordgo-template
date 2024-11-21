@@ -41,7 +41,7 @@ func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionR
 	for rows.Next() {
 		err := rows.Scan(&secret)
 		if err != nil {
-			c.logger.Warn("Failed to scan row: %v", err)
+			c.logger.Error("Failed to scan row: %v", err)
 		}
 		secrets = append(secrets, secret)
 	}
