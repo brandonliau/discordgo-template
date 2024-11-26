@@ -31,10 +31,7 @@ func (c *retrieveCommand) Command() *discordgo.ApplicationCommand {
 }
 
 func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
-	rows, err := c.db.Query("SELECT secret FROM userdata WHERE userID = ?", args.UserID)
-	if err != nil {
-		return nil, err
-	}
+	rows := c.db.Query("SELECT secret FROM userdata WHERE userID = ?", args.UserID)
 	defer rows.Close()
 	var secret string
 	var secrets []string

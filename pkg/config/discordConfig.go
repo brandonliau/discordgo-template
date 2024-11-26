@@ -32,11 +32,11 @@ func NewDiscordConfig(file string, logger logger.Logger) *discordConfig {
 func (c *discordConfig) load(file string) error {
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
-		return err
+		return fmt.Errorf("readfile: %v", err)
 	}
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal: %v", err)
 	}
 	return nil
 }

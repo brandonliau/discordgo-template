@@ -25,10 +25,7 @@ func (c *clearCommand) Command() *discordgo.ApplicationCommand {
 }
 
 func (c *clearCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
-	err := c.db.Exec("DELETE FROM userdata WHERE userID = ?", args.UserID)
-	if err != nil {
-		return nil, err
-	}
+	c.db.Exec("DELETE FROM userdata WHERE userID = ?", args.UserID)
 	rsp := shared.EphemeralContentResponse("Removed all secrets from database.")
 	return rsp, nil
 }

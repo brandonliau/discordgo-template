@@ -36,11 +36,7 @@ func NewSqliteDB(logger logger.Logger) *sqliteDB {
 		writeDB: writeDB,
 		logger:  logger,
 	}
-
-	err = sqliteDB.Exec("CREATE TABLE IF NOT EXISTS userdata (userID TEXT, secret TEXT)")
-	if err != nil {
-		logger.Error("Failed to initialize database: %v", err)
-	}
+	sqliteDB.migrate()
 
 	return sqliteDB
 }
@@ -59,6 +55,10 @@ func applyPerformanceOptions(db *sql.DB, maxOpenConns int) error {
 	return nil
 }
 
+func (s *sqliteDB) migrate() {
+	s.Exec("CREATE TABLE IF NOT EXISTS userdata (userID TEXT, secret TEXT)")
+}
+
 func (s *sqliteDB) Close() {
 	err := s.readDB.Close()
 	if err != nil {
@@ -70,50 +70,52 @@ func (s *sqliteDB) Close() {
 	}
 }
 
-func (s *sqliteDB) Query(query string, args ...any) (*sql.Rows, error) {
+func (s *sqliteDB) Query(query string, args ...any) *sql.Rows {
 	rows, err := s.readDB.Query(query, args...)
 	if err != nil {
-		return nil, err
+		s.logger.Debug("Query: %s", query)
+		s.logger.Error("Failed to query database: %v", err)
+		return nil
 	}
-	return rows, nil
+	return rows
 }
 
-func (s *sqliteDB) Exec(query string, args ...any) error {
+func (s *sqliteDB) Exec(query string, args ...any) {
 	_, err := s.writeDB.Exec(query, args...)
 	if err != nil {
-		return err
+		s.logger.Debug("Query: %s", query)
+		s.logger.Error("Failed to execute query: %v", err)
 	}
-	return nil
 }
 
-func (s *sqliteDB) Prepare(query string) (*sql.Stmt, error) {
+func (s *sqliteDB) Prepare(query string) *sql.Stmt {
 	stmt, err := s.writeDB.Prepare(query)
 	if err != nil {
-		return nil, err
+		s.logger.Debug("Query: %s", query)
+		s.logger.Error("Failed to prepare query: %v", err)
+		return nil
 	}
-	return stmt, nil
+	return stmt
 }
 
-func (s *sqliteDB) Begin() error {
+func (s *sqliteDB) Begin() {
 	_, err := s.writeDB.Exec("BEGIN IMMEDIATE")
 	if err != nil {
-		return err
+		s.logger.Error("Failed to begin transaction: %v", err)
 	}
-	return nil
 }
 
-func (s *sqliteDB) Commit() error {
+func (s *sqliteDB) Commit() {
 	_, err := s.writeDB.Exec("COMMIT")
 	if err != nil {
-		return err
+		s.logger.Error("Failed to commit transaction: %v", err)
+		s.Rollback()
 	}
-	return nil
 }
 
-func (s *sqliteDB) Rollback() error {
+func (s *sqliteDB) Rollback() {
 	_, err := s.writeDB.Exec("ROLLBACK")
 	if err != nil {
-		return err
+		s.logger.Error("Failed to rollback transaction: %v", err)
 	}
-	return nil
 }
