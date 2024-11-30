@@ -68,7 +68,7 @@ func (db *sqliteDB) Close() {
 func (db *sqliteDB) Query(query string, args ...any) *sql.Rows {
 	rows, err := db.readDB.Query(query, args...)
 	if err != nil {
-		db.logger.Debug("Query: %s", query)
+		db.logger.Info("Query: %s", query)
 		db.logger.Error("Failed to query database: %v", err)
 		return nil
 	}
@@ -78,7 +78,7 @@ func (db *sqliteDB) Query(query string, args ...any) *sql.Rows {
 func (db *sqliteDB) Exec(query string, args ...any) {
 	_, err := db.writeDB.Exec(query, args...)
 	if err != nil {
-		db.logger.Debug("Query: %s", query)
+		db.logger.Info("Query: %s", query)
 		db.logger.Error("Failed to execute query: %v", err)
 	}
 }
@@ -86,7 +86,7 @@ func (db *sqliteDB) Exec(query string, args ...any) {
 func (db *sqliteDB) Prepare(query string) *sql.Stmt {
 	stmt, err := db.writeDB.Prepare(query)
 	if err != nil {
-		db.logger.Debug("Query: %s", query)
+		db.logger.Info("Query: %s", query)
 		db.logger.Error("Failed to prepare query: %v", err)
 		return nil
 	}

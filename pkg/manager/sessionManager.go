@@ -69,7 +69,7 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if err != nil {
 				m.logger.Error("Failed to execute %s: %v", command.Command().Name, err)
 			}
-			m.logger.Debug("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
+			m.logger.Info("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
 		}
 	case discordgo.InteractionMessageComponent:
 		if component, ok := m.components[i.MessageComponentData().CustomID]; ok {
@@ -77,7 +77,7 @@ func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if err != nil {
 				m.logger.Error("Failed to execute %s: %v", component.CustomID(), err)
 			}
-			m.logger.Debug("%s executed %s", cmdArgs.UserID, component.CustomID())
+			m.logger.Info("%s executed %s", cmdArgs.UserID, component.CustomID())
 		}
 	}
 	err = m.notifier.SendResponse(i, rd)
