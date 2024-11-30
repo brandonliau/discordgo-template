@@ -36,7 +36,6 @@ func NewSqliteDB(logger logger.Logger) *sqliteDB {
 		writeDB: writeDB,
 		logger:  logger,
 	}
-	sqliteDB.migrate()
 
 	return sqliteDB
 }
@@ -55,67 +54,63 @@ func applyPerformanceOptions(db *sql.DB, maxOpenConns int) error {
 	return nil
 }
 
-func (s *sqliteDB) migrate() {
-	s.Exec("CREATE TABLE IF NOT EXISTS userdata (userID TEXT, secret TEXT)")
-}
-
-func (s *sqliteDB) Close() {
-	err := s.readDB.Close()
+func (db *sqliteDB) Close() {
+	err := db.readDB.Close()
 	if err != nil {
-		s.logger.Error("Failed to close read database connection: %v", err)
+		db.logger.Error("Failed to close read database connection: %v", err)
 	}
-	err = s.writeDB.Close()
+	err = db.writeDB.Close()
 	if err != nil {
-		s.logger.Error("Failed to close write database connection: %v", err)
+		db.logger.Error("Failed to close write database connection: %v", err)
 	}
 }
 
-func (s *sqliteDB) Query(query string, args ...any) *sql.Rows {
-	rows, err := s.readDB.Query(query, args...)
+func (db *sqliteDB) Query(query string, args ...any) *sql.Rows {
+	rows, err := db.readDB.Query(query, args...)
 	if err != nil {
-		s.logger.Debug("Query: %s", query)
-		s.logger.Error("Failed to query database: %v", err)
+		db.logger.Debug("Query: %s", query)
+		db.logger.Error("Failed to query database: %v", err)
 		return nil
 	}
 	return rows
 }
 
-func (s *sqliteDB) Exec(query string, args ...any) {
-	_, err := s.writeDB.Exec(query, args...)
+func (db *sqliteDB) Exec(query string, args ...any) {
+	_, err := db.writeDB.Exec(query, args...)
 	if err != nil {
-		s.logger.Debug("Query: %s", query)
-		s.logger.Error("Failed to execute query: %v", err)
+		db.logger.Debug("Query: %s", query)
+		db.logger.Error("Failed to execute query: %v", err)
 	}
 }
 
-func (s *sqliteDB) Prepare(query string) *sql.Stmt {
-	stmt, err := s.writeDB.Prepare(query)
+func (db *sqliteDB) Prepare(query string) *sql.Stmt {
+	stmt, err := db.writeDB.Prepare(query)
 	if err != nil {
-		s.logger.Debug("Query: %s", query)
-		s.logger.Error("Failed to prepare query: %v", err)
+		db.logger.Debug("Query: %s", query)
+		db.logger.Error("Failed to prepare query: %v", err)
 		return nil
 	}
 	return stmt
 }
 
-func (s *sqliteDB) Begin() {
-	_, err := s.writeDB.Exec("BEGIN IMMEDIATE")
+func (db *sqliteDB) Begin() {
+	_, err := db.writeDB.Exec("BEGIN IMMEDIATE")
 	if err != nil {
-		s.logger.Error("Failed to begin transaction: %v", err)
+		db.logger.Error("Failed to begin transaction: %v", err)
 	}
 }
 
-func (s *sqliteDB) Commit() {
-	_, err := s.writeDB.Exec("COMMIT")
+func (db *sqliteDB) Commit() {
+	_, err := db.writeDB.Exec("COMMIT")
 	if err != nil {
-		s.logger.Error("Failed to commit transaction: %v", err)
-		s.Rollback()
+		db.logger.Error("Failed to commit transaction: %v", err)
+		db.Rollback()
 	}
 }
 
-func (s *sqliteDB) Rollback() {
-	_, err := s.writeDB.Exec("ROLLBACK")
+func (db *sqliteDB) Rollback() {
+	_, err := db.writeDB.Exec("ROLLBACK")
 	if err != nil {
-		s.logger.Error("Failed to rollback transaction: %v", err)
+		db.logger.Error("Failed to rollback transaction: %v", err)
 	}
 }
