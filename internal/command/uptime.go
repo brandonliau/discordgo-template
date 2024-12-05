@@ -10,11 +10,13 @@ import (
 )
 
 type uptimeCommand struct {
+	auth  bool
 	start int64
 }
 
 func NewUptimeCommand(start int64) *uptimeCommand {
 	return &uptimeCommand{
+		auth:  false,
 		start: start,
 	}
 }
@@ -24,6 +26,10 @@ func (c *uptimeCommand) Command() *discordgo.ApplicationCommand {
 		Name:        "uptime",
 		Description: "Check bot uptime.",
 	}
+}
+
+func (c *uptimeCommand) Auth() bool {
+	return c.auth
 }
 
 func (c *uptimeCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {

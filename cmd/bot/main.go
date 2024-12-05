@@ -10,21 +10,23 @@ import (
 	"DiscordTemplate/pkg/database"
 	"DiscordTemplate/pkg/logger"
 
+	"DiscordTemplate/internal/authenticator"
 	"DiscordTemplate/internal/command"
 	"DiscordTemplate/internal/component"
 	"DiscordTemplate/internal/manager"
 	"DiscordTemplate/internal/notifier"
-	_ "DiscordTemplate/internal/service"
+	"DiscordTemplate/internal/service"
 
 	"github.com/bwmarrin/discordgo"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
-	// Create logger, config, and database
+	// Create logger, config, database, and service
 	logger := logger.NewStdLogger(logger.LevelDebug)
 	cfg := config.NewDiscordConfig("./config/config.yml", logger)
 	db := database.NewSqliteDB("./database.db", logger)
+	_ = service.NewExampleService(db, logger)
 	defer db.Close()
 
 	// Create new discord session
@@ -35,8 +37,9 @@ func main() {
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 
 	// Create notifier and session manager
+	authenticator := authenticator.NewDiscordAuthenticator(cfg)
 	notifier := notifier.NewDiscordNotifier(s)
-	m := manager.NewDiscordManager(s, logger, notifier)
+	m := manager.NewDiscordManager(s, logger, authenticator, notifier)
 
 	// Add event handlers
 	s.AddHandler(m.InteractionHandler)

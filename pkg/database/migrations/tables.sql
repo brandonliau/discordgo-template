@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS userdata (userID TEXT, secret TEXT)

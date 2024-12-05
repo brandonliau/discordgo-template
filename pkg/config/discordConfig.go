@@ -9,13 +9,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type discordConfig struct {
-	Token  string
-	logger logger.Logger
+type DiscordConfig struct {
+	Token          string `yaml:"token"`
+	Guild          string `yaml:"guild"`
+	AuthorizedRole string `yaml:"authorized_role"`
+	logger         logger.Logger
 }
 
-func NewDiscordConfig(file string, logger logger.Logger) *discordConfig {
-	cfg := &discordConfig{
+func NewDiscordConfig(file string, logger logger.Logger) *DiscordConfig {
+	cfg := &DiscordConfig{
 		logger: logger,
 	}
 	err := cfg.load(file)
@@ -29,7 +31,7 @@ func NewDiscordConfig(file string, logger logger.Logger) *discordConfig {
 	return cfg
 }
 
-func (c *discordConfig) load(file string) error {
+func (c *DiscordConfig) load(file string) error {
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
 		return fmt.Errorf("readfile: %v", err)
@@ -41,9 +43,15 @@ func (c *discordConfig) load(file string) error {
 	return nil
 }
 
-func (c *discordConfig) validate() error {
+func (c *DiscordConfig) validate() error {
 	if c.Token == "" {
 		return fmt.Errorf("empty token")
+	}
+	if c.Guild == "" {
+		return fmt.Errorf("empty guild")
+	}
+	if c.AuthorizedRole == "" {
+		return fmt.Errorf("empty authorized role")
 	}
 	return nil
 }

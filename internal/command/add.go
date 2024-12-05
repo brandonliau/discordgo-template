@@ -10,12 +10,14 @@ import (
 )
 
 type addCommand struct {
-	db database.Database
+	auth bool
+	db   database.Database
 }
 
 func NewAddCommand(db database.Database) *addCommand {
 	return &addCommand{
-		db: db,
+		auth: false,
+		db:   db,
 	}
 }
 
@@ -32,6 +34,10 @@ func (c *addCommand) Command() *discordgo.ApplicationCommand {
 			},
 		},
 	}
+}
+
+func (c *addCommand) Auth() bool {
+	return c.auth
 }
 
 func (c *addCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {

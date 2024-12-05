@@ -8,12 +8,14 @@ import (
 )
 
 type clearCommand struct {
-	db database.Database
+	auth bool
+	db   database.Database
 }
 
 func NewClearCommand(db database.Database) *clearCommand {
 	return &clearCommand{
-		db: db,
+		auth: false,
+		db:   db,
 	}
 }
 
@@ -22,6 +24,10 @@ func (c *clearCommand) Command() *discordgo.ApplicationCommand {
 		Name:        "clear",
 		Description: "Clear secrets from database.",
 	}
+}
+
+func (c *clearCommand) Auth() bool {
+	return c.auth
 }
 
 func (c *clearCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {

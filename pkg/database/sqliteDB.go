@@ -7,13 +7,13 @@ import (
 	"DiscordTemplate/pkg/logger"
 )
 
-type sqliteDB struct {
+type SqliteDB struct {
 	readDB  *sql.DB
 	writeDB *sql.DB
 	logger  logger.Logger
 }
 
-func NewSqliteDB(file string, logger logger.Logger) *sqliteDB {
+func NewSqliteDB(file string, logger logger.Logger) *SqliteDB {
 	readDB, err := sql.Open("sqlite", file)
 	if err != nil {
 		logger.Fatal("Failed to open read database connection: %v", err)
@@ -22,7 +22,7 @@ func NewSqliteDB(file string, logger logger.Logger) *sqliteDB {
 	if err != nil {
 		logger.Fatal("Failed to open write database connection: %v", err)
 	}
-	sqliteDB := &sqliteDB{
+	sqliteDB := &SqliteDB{
 		readDB:  readDB,
 		writeDB: writeDB,
 		logger:  logger,
@@ -38,7 +38,7 @@ func NewSqliteDB(file string, logger logger.Logger) *sqliteDB {
 	return sqliteDB
 }
 
-func (db *sqliteDB) applyPerformanceOptions(sdb *sql.DB, maxOpenConns int, file string) error {
+func (db *SqliteDB) applyPerformanceOptions(sdb *sql.DB, maxOpenConns int, file string) error {
 	sdb.SetMaxOpenConns(maxOpenConns)
 	err := db.ExecSQLFile(file)
 	if err != nil {
@@ -47,7 +47,7 @@ func (db *sqliteDB) applyPerformanceOptions(sdb *sql.DB, maxOpenConns int, file 
 	return nil
 }
 
-func (db *sqliteDB) Close() error {
+func (db *SqliteDB) Close() error {
 	err := db.readDB.Close()
 	if err != nil {
 		db.logger.Error("Failed to close read database connection: %v", err)
@@ -61,7 +61,7 @@ func (db *sqliteDB) Close() error {
 	return nil
 }
 
-func (db *sqliteDB) ExecSQLFile(file string) error {
+func (db *SqliteDB) ExecSQLFile(file string) error {
 	sqlContent, err := os.ReadFile(file)
 	if err != nil {
 		db.logger.Info("File: %s", file)
@@ -77,7 +77,7 @@ func (db *sqliteDB) ExecSQLFile(file string) error {
 	return nil
 }
 
-func (db *sqliteDB) Exec(query string, args ...any) error {
+func (db *SqliteDB) Exec(query string, args ...any) error {
 	_, err := db.writeDB.Exec(query, args...)
 	if err != nil {
 		db.logger.Info("Query: %s", query)
@@ -87,7 +87,7 @@ func (db *sqliteDB) Exec(query string, args ...any) error {
 	return nil
 }
 
-func (db *sqliteDB) Query(query string, args ...any) (*sql.Rows, error) {
+func (db *SqliteDB) Query(query string, args ...any) (*sql.Rows, error) {
 	rows, err := db.readDB.Query(query, args...)
 	if err != nil {
 		db.logger.Info("Query: %s", query)
@@ -97,7 +97,7 @@ func (db *sqliteDB) Query(query string, args ...any) (*sql.Rows, error) {
 	return rows, nil
 }
 
-func (db *sqliteDB) PrepareExec(query string) (*sql.Stmt, error) {
+func (db *SqliteDB) PrepareExec(query string) (*sql.Stmt, error) {
 	stmt, err := db.writeDB.Prepare(query)
 	if err != nil {
 		db.logger.Info("Query: %s", query)
@@ -107,7 +107,7 @@ func (db *sqliteDB) PrepareExec(query string) (*sql.Stmt, error) {
 	return stmt, nil
 }
 
-func (db *sqliteDB) PrepareQuery(query string) (*sql.Stmt, error) {
+func (db *SqliteDB) PrepareQuery(query string) (*sql.Stmt, error) {
 	stmt, err := db.readDB.Prepare(query)
 	if err != nil {
 		db.logger.Info("Query: %s", query)
@@ -117,7 +117,7 @@ func (db *sqliteDB) PrepareQuery(query string) (*sql.Stmt, error) {
 	return stmt, nil
 }
 
-func (db *sqliteDB) Begin() error {
+func (db *SqliteDB) Begin() error {
 	_, err := db.writeDB.Exec("BEGIN IMMEDIATE")
 	if err != nil {
 		db.logger.Error("Failed to begin transaction: %v", err)
@@ -126,7 +126,7 @@ func (db *sqliteDB) Begin() error {
 	return nil
 }
 
-func (db *sqliteDB) Commit() error {
+func (db *SqliteDB) Commit() error {
 	_, err := db.writeDB.Exec("COMMIT")
 	if err != nil {
 		db.logger.Error("Failed to commit transaction: %v", err)
@@ -136,7 +136,7 @@ func (db *sqliteDB) Commit() error {
 	return nil
 }
 
-func (db *sqliteDB) Rollback() error {
+func (db *SqliteDB) Rollback() error {
 	_, err := db.writeDB.Exec("ROLLBACK")
 	if err != nil {
 		db.logger.Error("Failed to rollback transaction: %v", err)

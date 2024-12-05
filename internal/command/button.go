@@ -9,10 +9,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type buttonCommand struct{}
+type buttonCommand struct {
+	auth bool
+}
 
 func NewButtonCommand() *buttonCommand {
-	return &buttonCommand{}
+	return &buttonCommand{
+		auth: true,
+	}
 }
 
 func (c *buttonCommand) Command() *discordgo.ApplicationCommand {
@@ -20,6 +24,10 @@ func (c *buttonCommand) Command() *discordgo.ApplicationCommand {
 		Name:        "button",
 		Description: "Get example buttons.",
 	}
+}
+
+func (c *buttonCommand) Auth() bool {
+	return c.auth
 }
 
 func (c *buttonCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {

@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"DiscordTemplate/internal/authenticator"
 	"DiscordTemplate/internal/command"
 	"DiscordTemplate/internal/component"
 	"DiscordTemplate/internal/notifier"
@@ -11,20 +12,22 @@ import (
 )
 
 type discordManager struct {
-	session    *discordgo.Session
-	logger     logger.Logger
-	notifier   notifier.Notifier
-	commands   map[string]command.Command
-	components map[string]component.Component
+	session       *discordgo.Session
+	logger        logger.Logger
+	authenticator authenticator.Authenticator
+	notifier      notifier.Notifier
+	commands      map[string]command.Command
+	components    map[string]component.Component
 }
 
-func NewDiscordManager(s *discordgo.Session, logger logger.Logger, notifier notifier.Notifier) *discordManager {
+func NewDiscordManager(s *discordgo.Session, logger logger.Logger, authenticator authenticator.Authenticator, notifier notifier.Notifier) *discordManager {
 	return &discordManager{
-		session:    s,
-		logger:     logger,
-		notifier:   notifier,
-		commands:   make(map[string]command.Command),
-		components: make(map[string]component.Component),
+		session:       s,
+		logger:        logger,
+		authenticator: authenticator,
+		notifier:      notifier,
+		commands:      make(map[string]command.Command),
+		components:    make(map[string]component.Component),
 	}
 }
 
@@ -65,6 +68,11 @@ func (m *discordManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if command, ok := m.commands[i.ApplicationCommandData().Name]; ok {
+			if !m.authenticator.Authenticate(command, cmdArgs) {
+				rd = shared.EphemeralContentResponse("Authorized users only!")
+				m.logger.Info("Unauthorized user %s attempted to execute %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
+				break
+			}
 			rd, err = command.Execute(cmdArgs)
 			if err != nil {
 				m.logger.Error("Failed to execute %s: %v", command.Command().Name, err)

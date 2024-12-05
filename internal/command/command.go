@@ -14,6 +14,7 @@ const (
 
 type Command interface {
 	Command() *discordgo.ApplicationCommand
+	Auth() bool
 	Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error)
 }
 

@@ -12,12 +12,14 @@ import (
 )
 
 type retrieveCommand struct {
+	auth   bool
 	db     database.Database
 	logger logger.Logger
 }
 
 func NewRetrieveCommand(db database.Database, logger logger.Logger) *retrieveCommand {
 	return &retrieveCommand{
+		auth:   false,
 		db:     db,
 		logger: logger,
 	}
@@ -28,6 +30,10 @@ func (c *retrieveCommand) Command() *discordgo.ApplicationCommand {
 		Name:        "retrieve",
 		Description: "Retrieve secrets from database.",
 	}
+}
+
+func (c *retrieveCommand) Auth() bool {
+	return c.auth
 }
 
 func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
