@@ -35,7 +35,7 @@ func main() {
 
 	// Create notifier and session manager
 	notifier := notifier.NewDiscordNotifier(s)
-	m := manager.NewSessionManager(s, logger, notifier)
+	m := manager.NewDiscordManager(s, logger, notifier)
 
 	// Add event handlers
 	s.AddHandler(m.InteractionHandler)
@@ -60,7 +60,7 @@ func main() {
 	m.RegisterCommand(command.NewButtonCommand())
 
 	// Register application components
-	m.RegisterComponent(component.NewPingComponent())
+	m.RegisterComponent(component.NewPingButton())
 
 	// Update bot personalization
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")

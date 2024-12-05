@@ -51,17 +51,17 @@ func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionR
 }
 
 func (c *retrieveCommand) retrieveEmbed(secrets ...string) *discordgo.MessageEmbed {
-	var desc string
+	var description string
 	for _, secret := range secrets {
-		desc += fmt.Sprintf("%s\n", secret)
+		description += fmt.Sprintf("%s\n", secret)
 	}
-	if desc == "" {
+	if description == "" {
 		return nil
 	}
-	desc = desc[:len(desc)-1]
+	description = description[:len(description)-1]
 	return &discordgo.MessageEmbed{
 		Title:       "Secrets",
-		Description: desc,
+		Description: description,
 		Color:       blue,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time.Now().Format("01/02/2006 03:04:05 PM"),

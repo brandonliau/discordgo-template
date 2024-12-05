@@ -10,7 +10,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type sessionManager struct {
+type discordManager struct {
 	session    *discordgo.Session
 	logger     logger.Logger
 	notifier   notifier.Notifier
@@ -18,8 +18,8 @@ type sessionManager struct {
 	components map[string]component.Component
 }
 
-func NewSessionManager(s *discordgo.Session, logger logger.Logger, notifier notifier.Notifier) *sessionManager {
-	return &sessionManager{
+func NewDiscordManager(s *discordgo.Session, logger logger.Logger, notifier notifier.Notifier) *discordManager {
+	return &discordManager{
 		session:    s,
 		logger:     logger,
 		notifier:   notifier,
@@ -28,7 +28,7 @@ func NewSessionManager(s *discordgo.Session, logger logger.Logger, notifier noti
 	}
 }
 
-func (m *sessionManager) RegisterCommand(c command.Command) {
+func (m *discordManager) RegisterCommand(c command.Command) {
 	cname := c.Command().Name
 	if _, ok := m.commands[cname]; ok {
 		m.logger.Error("Application command %s already registered", cname)
@@ -40,7 +40,7 @@ func (m *sessionManager) RegisterCommand(c command.Command) {
 	m.commands[cname] = c
 }
 
-func (m *sessionManager) RegisterComponent(c component.Component) {
+func (m *discordManager) RegisterComponent(c component.Component) {
 	cname := c.CustomID()
 	if _, ok := m.components[cname]; ok {
 		m.logger.Error("Application component %s already registered", cname)
@@ -48,7 +48,7 @@ func (m *sessionManager) RegisterComponent(c component.Component) {
 	m.components[cname] = c
 }
 
-func (m *sessionManager) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (m *discordManager) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var userID string
 	if i.Member != nil {
 		userID = i.Member.User.ID

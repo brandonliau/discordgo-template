@@ -24,7 +24,7 @@ func (c *buttonCommand) Command() *discordgo.ApplicationCommand {
 
 func (c *buttonCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
 	rsp := shared.EphemeralEmbedResponse(c.buttonEmbed())
-	rsp = shared.AddComponent(rsp, component.NewPingComponent().Component(), component.NewLinkComponent().Component())
+	rsp = shared.AddComponent(rsp, component.NewPingButton().Component(), component.NewGithubButton().Component())
 	return rsp, nil
 }
 

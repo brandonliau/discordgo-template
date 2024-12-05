@@ -8,17 +8,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type pingComponent struct{}
+type pingButton struct{}
 
-func NewPingComponent() *pingComponent {
-	return &pingComponent{}
+func NewPingButton() *pingButton {
+	return &pingButton{}
 }
 
-func (c *pingComponent) CustomID() string {
+func (c *pingButton) CustomID() string {
 	return c.Component().(discordgo.Button).CustomID
 }
 
-func (c *pingComponent) Component() discordgo.MessageComponent {
+func (c *pingButton) Component() discordgo.MessageComponent {
 	return discordgo.Button{
 		Label:    "Ping",
 		Style:    discordgo.PrimaryButton,
@@ -26,7 +26,7 @@ func (c *pingComponent) Component() discordgo.MessageComponent {
 	}
 }
 
-func (c *pingComponent) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *pingButton) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
 	rsp := shared.EphemeralContentResponse(fmt.Sprintf("Pong! `%d ms`", args.Session.HeartbeatLatency().Milliseconds()))
 	return rsp, nil
 }
