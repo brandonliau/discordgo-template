@@ -55,6 +55,12 @@ func main() {
 	}
 	defer s.Close()
 
+	// Start service
+	err = service.Start()
+	if err != nil {
+		logger.Fatal("Failed to start service: %v", err)
+	}
+
 	// Register application commands
 	m.RegisterCommand(command.NewPingCommand())
 	m.RegisterCommand(command.NewUptimeCommand(time.Now().Unix()))
@@ -69,12 +75,6 @@ func main() {
 	// Update bot personalization
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
 	logger.Info("Bot running")
-
-	// Start service
-	err = service.Start()
-	if err != nil {
-		logger.Fatal("Failed to start service: %v", err)
-	}
 
 	// Create stop channel and block execution until a stop signal is received
 	sc := make(chan os.Signal, 1)
