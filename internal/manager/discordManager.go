@@ -1,11 +1,11 @@
 package manager
 
 import (
-	"DiscordTemplate/pkg/command"
-	"DiscordTemplate/pkg/component"
+	"DiscordTemplate/internal/command"
+	"DiscordTemplate/internal/component"
+	"DiscordTemplate/internal/notifier"
+	"DiscordTemplate/internal/shared"
 	"DiscordTemplate/pkg/logger"
-	"DiscordTemplate/pkg/notifier"
-	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )

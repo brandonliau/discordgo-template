@@ -1,8 +1,8 @@
 package manager
 
 import (
-	"DiscordTemplate/pkg/command"
-	"DiscordTemplate/pkg/component"
+	"DiscordTemplate/internal/command"
+	"DiscordTemplate/internal/component"
 )
 
 type Manager interface {

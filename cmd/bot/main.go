@@ -6,14 +6,15 @@ import (
 	"syscall"
 	"time"
 
-	"DiscordTemplate/pkg/command"
-	"DiscordTemplate/pkg/component"
 	"DiscordTemplate/pkg/config"
 	"DiscordTemplate/pkg/database"
 	"DiscordTemplate/pkg/logger"
-	"DiscordTemplate/pkg/manager"
-	"DiscordTemplate/pkg/notifier"
-	_ "DiscordTemplate/pkg/service"
+
+	"DiscordTemplate/internal/command"
+	"DiscordTemplate/internal/component"
+	"DiscordTemplate/internal/manager"
+	"DiscordTemplate/internal/notifier"
+	_ "DiscordTemplate/internal/service"
 
 	"github.com/bwmarrin/discordgo"
 	_ "modernc.org/sqlite"
@@ -22,8 +23,8 @@ import (
 func main() {
 	// Create logger, config, and database
 	logger := logger.NewStdLogger(logger.LevelDebug)
-	cfg := config.NewDiscordConfig("config.yml", logger)
-	db := database.NewSqliteDB(logger)
+	cfg := config.NewDiscordConfig("./config/config.yml", logger)
+	db := database.NewSqliteDB("./database.db", logger)
 	defer db.Close()
 
 	// Create new discord session

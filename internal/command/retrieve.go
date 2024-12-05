@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"DiscordTemplate/internal/shared"
 	"DiscordTemplate/pkg/database"
 	"DiscordTemplate/pkg/logger"
-	"DiscordTemplate/pkg/shared"
 
 	"github.com/bwmarrin/discordgo"
 )

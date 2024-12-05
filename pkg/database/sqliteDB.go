@@ -13,12 +13,12 @@ type sqliteDB struct {
 	logger  logger.Logger
 }
 
-func NewSqliteDB(logger logger.Logger) *sqliteDB {
-	readDB, err := sql.Open("sqlite", "./database.db")
+func NewSqliteDB(file string, logger logger.Logger) *sqliteDB {
+	readDB, err := sql.Open("sqlite", file)
 	if err != nil {
 		logger.Fatal("Failed to open read database connection: %v", err)
 	}
-	writeDB, err := sql.Open("sqlite", "./database.db")
+	writeDB, err := sql.Open("sqlite", file)
 	if err != nil {
 		logger.Fatal("Failed to open write database connection: %v", err)
 	}

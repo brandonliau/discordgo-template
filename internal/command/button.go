@@ -3,8 +3,8 @@ package command
 import (
 	"time"
 
-	"DiscordTemplate/pkg/component"
-	"DiscordTemplate/pkg/shared"
+	"DiscordTemplate/internal/shared"
+	"DiscordTemplate/internal/component"
 
 	"github.com/bwmarrin/discordgo"
 )
