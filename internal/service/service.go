@@ -1,3 +1,6 @@
 package service
 
-type Service interface{}
+type Service interface{
+	Start() error
+	Stop() error
+}

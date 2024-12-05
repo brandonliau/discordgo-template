@@ -40,6 +40,7 @@ func (m *discordManager) RegisterCommand(c command.Command) {
 	if err != nil {
 		m.logger.Error("Failed to add application command %s : %v", cname, err)
 	}
+	m.logger.Debug("Registered command %v", cname)
 	m.commands[cname] = c
 }
 
@@ -48,6 +49,7 @@ func (m *discordManager) RegisterComponent(c component.Component) {
 	if _, ok := m.components[cname]; ok {
 		m.logger.Error("Application component %s already registered", cname)
 	}
+	m.logger.Debug("Registered component %v", cname)
 	m.components[cname] = c
 }
 
@@ -70,22 +72,22 @@ func (m *discordManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		if command, ok := m.commands[i.ApplicationCommandData().Name]; ok {
 			if !m.authenticator.Authenticate(command, cmdArgs) {
 				rd = shared.EphemeralContentResponse("Authorized users only!")
-				m.logger.Info("Unauthorized user %s attempted to execute %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
+				m.logger.Info("Unauthorized user %s attempted to execute /%s", userID, i.ApplicationCommandData().Name)
 				break
 			}
 			rd, err = command.Execute(cmdArgs)
 			if err != nil {
-				m.logger.Error("Failed to execute %s: %v", command.Command().Name, err)
+				m.logger.Error("Failed to execute /%s: %v", command.Command().Name, err)
 			}
-			m.logger.Info("%s executed %s", cmdArgs.UserID, i.ApplicationCommandData().Name)
+			m.logger.Info("%s executed /%s", userID, i.ApplicationCommandData().Name)
 		}
 	case discordgo.InteractionMessageComponent:
 		if component, ok := m.components[i.MessageComponentData().CustomID]; ok {
 			rd, err = component.Execute(cmdArgs)
 			if err != nil {
-				m.logger.Error("Failed to execute %s: %v", component.CustomID(), err)
+				m.logger.Error("Failed to execute /%s: %v", component.CustomID(), err)
 			}
-			m.logger.Info("%s executed %s", cmdArgs.UserID, component.CustomID())
+			m.logger.Info("%s executed /%s", userID, component.CustomID())
 		}
 	}
 	err = m.notifier.SendResponse(i, rd)

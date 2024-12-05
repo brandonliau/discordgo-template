@@ -26,7 +26,7 @@ func main() {
 	logger := logger.NewStdLogger(logger.LevelDebug)
 	cfg := config.NewDiscordConfig("./config/config.yml", logger)
 	db := database.NewSqliteDB("./database.db", logger)
-	_ = service.NewExampleService(db, logger)
+	service := service.NewExampleService(db, logger)
 	defer db.Close()
 
 	// Create new discord session
@@ -70,10 +70,22 @@ func main() {
 	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
 	logger.Info("Bot running")
 
+	// Start service
+	err = service.Start()
+	if err != nil {
+		logger.Fatal("Failed to start service: %v", err)
+	}
+
 	// Create stop channel and block execution until a stop signal is received
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-sc
+
+	// Stop service
+	err = service.Stop()
+	if err != nil {
+		logger.Error("Failed to stop service: %v", err)
+	}
 
 	// Remove application commands
 	_, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)

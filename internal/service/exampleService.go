@@ -19,9 +19,20 @@ func NewExampleService(db database.Database, logger logger.Logger) *exampleServi
 	return exampleService
 }
 
-func (s *exampleServices) migrate() {
+func (s *exampleServices) migrate() error {
 	err := s.db.ExecSQLFile("./pkg/database/migrations/tables.sql")
+	return err
+}
+
+
+func (s *exampleServices) Start() error {
+	err := s.migrate()
 	if err != nil {
-		s.logger.Fatal("Failed to migrate tables: %v", err)
+		return err
 	}
+	return nil
+}
+
+func (s *exampleServices) Stop() error {
+	return nil
 }
