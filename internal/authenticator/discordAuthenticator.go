@@ -4,22 +4,25 @@ import (
 	"slices"
 
 	"DiscordTemplate/internal/command"
-	"DiscordTemplate/internal/shared"
 	"DiscordTemplate/pkg/config"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 type discordAuthenticator struct {
 	config *config.DiscordConfig
+	session *discordgo.Session
 }
 
-func NewDiscordAuthenticator(cfg config.Config) *discordAuthenticator {
+func NewDiscordAuthenticator(cfg config.Config, session *discordgo.Session) *discordAuthenticator {
 	return &discordAuthenticator{
 		config: cfg.(*config.DiscordConfig),
+		session: session,
 	}
 }
 
-func (a *discordAuthenticator) Authenticate(cmd command.Command, cmdArgs *shared.CmdArgs) bool {
-	member, _ := cmdArgs.Session.State.Member(a.config.Guild, cmdArgs.UserID)
+func (a *discordAuthenticator) Authenticate(cmd command.Command, userID string) bool {
+	member, _ := a.session.State.Member(a.config.Guild, userID)
 	if !cmd.Auth() {
 		return true
 	}

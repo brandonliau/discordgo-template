@@ -37,7 +37,7 @@ func main() {
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 
 	// Create notifier and session manager
-	authenticator := authenticator.NewDiscordAuthenticator(cfg)
+	authenticator := authenticator.NewDiscordAuthenticator(cfg, s)
 	notifier := notifier.NewDiscordNotifier(s)
 	m := manager.NewDiscordManager(s, logger, authenticator, notifier)
 

@@ -70,7 +70,7 @@ func (m *discordManager) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if command, ok := m.commands[i.ApplicationCommandData().Name]; ok {
-			if !m.authenticator.Authenticate(command, cmdArgs) {
+			if !m.authenticator.Authenticate(command, userID) {
 				rd = shared.EphemeralContentResponse("Authorized users only!")
 				m.logger.Info("Unauthorized user %s attempted to execute /%s", userID, i.ApplicationCommandData().Name)
 				break
