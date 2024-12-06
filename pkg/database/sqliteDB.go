@@ -97,6 +97,11 @@ func (db *SqliteDB) Query(query string, args ...any) (*sql.Rows, error) {
 	return rows, nil
 }
 
+func (db *SqliteDB) QueryRow(query string, args ...any) (*sql.Row, error) {
+	row := db.readDB.QueryRow(query, args...)
+	return row, nil
+}
+
 func (db *SqliteDB) PrepareExec(query string) (*sql.Stmt, error) {
 	stmt, err := db.writeDB.Prepare(query)
 	if err != nil {
