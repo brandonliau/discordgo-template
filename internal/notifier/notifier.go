@@ -11,19 +11,19 @@ type Notifier interface {
 }
 
 func MessageSend(c string, e *discordgo.MessageEmbed, mc ...discordgo.MessageComponent) *discordgo.MessageSend {
-	if len(mc) == 0 {
-		return &discordgo.MessageSend{
-			Content: c,
-			Embeds:  []*discordgo.MessageEmbed{e},
-		}
+	messageSend := discordgo.MessageSend{}
+	if c != "" {
+		messageSend.Content = c
 	}
-	return &discordgo.MessageSend{
-		Content: c,
-		Embeds:  []*discordgo.MessageEmbed{e},
-		Components: []discordgo.MessageComponent{
+	if e != nil {
+		messageSend.Embeds = []*discordgo.MessageEmbed{e}
+	}
+	if len(mc) != 0 {
+		messageSend.Components = []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: mc,
 			},
-		},
+		}
 	}
+	return &messageSend
 }
