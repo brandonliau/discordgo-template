@@ -36,14 +36,14 @@ func main() {
 	}
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 
-	// Create notifier and session manager
+	// Create authenticator, notifier, and session manager
 	authenticator := authenticator.NewDiscordAuthenticator(cfg, s)
 	notifier := notifier.NewDiscordNotifier(s)
 	m := manager.NewDiscordManager(s, logger, authenticator, notifier)
 
 	// Add event handlers
-	s.AddHandler(m.InteractionHandler)
-	s.AddHandler(m.ConnectHandler)
+	s.AddHandler(m.CommandInteractionHandler)
+	s.AddHandler(m.ComponentInteractionHandler)
 	s.AddHandler(m.ReadyHandler)
 	s.AddHandler(m.ResumedHandler)
 	s.AddHandler(m.RateLimitHandler)

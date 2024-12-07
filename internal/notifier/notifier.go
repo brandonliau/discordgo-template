@@ -5,7 +5,7 @@ import (
 )
 
 type Notifier interface {
-	SendResponse(i *discordgo.InteractionCreate, rd *discordgo.InteractionResponseData) error
+	SendResponse(i *discordgo.InteractionCreate, ir *discordgo.InteractionResponse) error
 	SendComplexMessage(userID string, data *discordgo.MessageSend) error
 }
 

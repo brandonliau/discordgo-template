@@ -24,7 +24,6 @@ func (s *exampleServices) migrate() error {
 	return err
 }
 
-
 func (s *exampleServices) Start() error {
 	err := s.migrate()
 	if err != nil {

@@ -36,7 +36,7 @@ func (c *retrieveCommand) Auth() bool {
 	return c.auth
 }
 
-func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *retrieveCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	rows, _ := c.db.Query("SELECT secret FROM userdata WHERE userID = ?", args.UserID)
 	defer rows.Close()
 	var secret string
@@ -68,7 +68,7 @@ func (c *retrieveCommand) retrieveEmbed(secrets ...string) *discordgo.MessageEmb
 	return &discordgo.MessageEmbed{
 		Title:       "Secrets",
 		Description: description,
-		Color:       blue,
+		Color:       shared.Blue,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time.Now().Format("01/02/2006 03:04:05 PM"),
 		},

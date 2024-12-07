@@ -30,7 +30,7 @@ func (c *buttonCommand) Auth() bool {
 	return c.auth
 }
 
-func (c *buttonCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *buttonCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	rsp := shared.EphemeralEmbedResponse(c.buttonEmbed())
 	rsp = shared.AddComponent(rsp, component.NewPingButton().Component(), component.NewGithubButton().Component())
 	return rsp, nil
@@ -40,7 +40,7 @@ func (c *buttonCommand) buttonEmbed() *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Buttons",
 		Description: "Here are some sample buttons",
-		Color:       blue,
+		Color:       shared.Blue,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time.Now().Format("01/02/2006 03:04:05 PM"),
 		},

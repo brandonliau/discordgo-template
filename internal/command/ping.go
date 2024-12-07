@@ -29,7 +29,7 @@ func (c *pingCommand) Auth() bool {
 	return c.auth
 }
 
-func (c *pingCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *pingCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	rsp := shared.EphemeralContentResponse(fmt.Sprintf("Pong! `%d ms`", args.Session.HeartbeatLatency().Milliseconds()))
 	return rsp, nil
 }

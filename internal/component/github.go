@@ -20,6 +20,6 @@ func (c *githubButton) Component() discordgo.MessageComponent {
 	}
 }
 
-func (c *githubButton) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *githubButton) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	return nil, nil
 }

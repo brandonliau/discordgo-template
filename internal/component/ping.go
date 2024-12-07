@@ -22,11 +22,11 @@ func (c *pingButton) Component() discordgo.MessageComponent {
 	return discordgo.Button{
 		Label:    "Ping",
 		Style:    discordgo.PrimaryButton,
-		CustomID: "component_ping",
+		CustomID: "ping",
 	}
 }
 
-func (c *pingButton) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *pingButton) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	rsp := shared.EphemeralContentResponse(fmt.Sprintf("Pong! `%d ms`", args.Session.HeartbeatLatency().Milliseconds()))
 	return rsp, nil
 }

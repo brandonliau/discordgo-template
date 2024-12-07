@@ -4,14 +4,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func (m *discordManager) ConnectHandler(s *discordgo.Session, c *discordgo.Connect) {
-	m.logger.Info("Connect event")
-}
-
-func (m *discordManager) DisconnectHandler(s *discordgo.Session, d *discordgo.Disconnect) {
-	m.logger.Info("Disconnect event")
-}
-
 func (m *discordManager) ReadyHandler(s *discordgo.Session, r *discordgo.Ready) {
 	m.logger.Info("Ready event")
 }

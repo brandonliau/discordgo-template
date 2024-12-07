@@ -30,7 +30,7 @@ func (c *clearCommand) Auth() bool {
 	return c.auth
 }
 
-func (c *clearCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *clearCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	c.db.Exec("DELETE FROM userdata WHERE userID = ?", args.UserID)
 	rsp := shared.EphemeralContentResponse("Removed all secrets from database.")
 	return rsp, nil

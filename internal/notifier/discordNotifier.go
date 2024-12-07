@@ -1,14 +1,11 @@
 package notifier
 
 import (
-	"DiscordTemplate/pkg/logger"
-
 	"github.com/bwmarrin/discordgo"
 )
 
 type discordNotifier struct {
 	session *discordgo.Session
-	logger  logger.Logger
 }
 
 func NewDiscordNotifier(s *discordgo.Session) *discordNotifier {
@@ -17,11 +14,8 @@ func NewDiscordNotifier(s *discordgo.Session) *discordNotifier {
 	}
 }
 
-func (n *discordNotifier) SendResponse(i *discordgo.InteractionCreate, rd *discordgo.InteractionResponseData) error {
-	err := n.session.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: rd,
-	})
+func (n *discordNotifier) SendResponse(i *discordgo.InteractionCreate, ir *discordgo.InteractionResponse) error {
+	err := n.session.InteractionRespond(i.Interaction, ir)
 	if err != nil {
 		return err
 	}
@@ -31,7 +25,7 @@ func (n *discordNotifier) SendResponse(i *discordgo.InteractionCreate, rd *disco
 func (n *discordNotifier) SendComplexMessage(userID string, data *discordgo.MessageSend) error {
 	dmChannel, err := n.session.UserChannelCreate(userID)
 	if err != nil {
-		n.logger.Error("Failed to create a private channel with user %s: %v", userID, err)
+		return err
 	}
 	_, err = n.session.ChannelMessageSendComplex(
 		dmChannel.ID,

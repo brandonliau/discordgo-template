@@ -32,7 +32,7 @@ func (c *uptimeCommand) Auth() bool {
 	return c.auth
 }
 
-func (c *uptimeCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *uptimeCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	rsp := shared.EphemeralEmbedResponse(c.uptimeEmbed())
 	return rsp, nil
 }
@@ -50,7 +50,7 @@ func (c *uptimeCommand) uptimeEmbed() *discordgo.MessageEmbed {
 			((diff / 60) % 60),
 			(diff % 60),
 		),
-		Color: blue,
+		Color: shared.Blue,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time.Now().Format("01/02/2006 03:04:05 PM"),
 		},

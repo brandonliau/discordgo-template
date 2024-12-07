@@ -10,13 +10,13 @@ import (
 )
 
 type discordAuthenticator struct {
-	config *config.DiscordConfig
+	config  *config.DiscordConfig
 	session *discordgo.Session
 }
 
 func NewDiscordAuthenticator(cfg config.Config, session *discordgo.Session) *discordAuthenticator {
 	return &discordAuthenticator{
-		config: cfg.(*config.DiscordConfig),
+		config:  cfg.(*config.DiscordConfig),
 		session: session,
 	}
 }

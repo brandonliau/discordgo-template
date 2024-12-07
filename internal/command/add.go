@@ -40,7 +40,7 @@ func (c *addCommand) Auth() bool {
 	return c.auth
 }
 
-func (c *addCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponseData, error) {
+func (c *addCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	opts := ParseInteractionOptions(args.Interaction.ApplicationCommandData())
 	secret := opts["data"]
 	c.db.Exec("INSERT INTO userdata (userID, secret) VALUES (?, ?)", args.UserID, secret)
