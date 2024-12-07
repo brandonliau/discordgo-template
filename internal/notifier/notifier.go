@@ -6,7 +6,8 @@ import (
 
 type Notifier interface {
 	SendResponse(i *discordgo.InteractionCreate, ir *discordgo.InteractionResponse) error
-	SendComplexMessage(userID string, data *discordgo.MessageSend) error
+	SendComplexMessage(channelID string, data *discordgo.MessageSend) error
+	CreateDMChannel(userID string) (string, error)
 }
 
 func MessageSend(c string, e *discordgo.MessageEmbed, mc ...discordgo.MessageComponent) *discordgo.MessageSend {

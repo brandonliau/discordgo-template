@@ -22,17 +22,21 @@ func (n *discordNotifier) SendResponse(i *discordgo.InteractionCreate, ir *disco
 	return nil
 }
 
-func (n *discordNotifier) SendComplexMessage(userID string, data *discordgo.MessageSend) error {
-	dmChannel, err := n.session.UserChannelCreate(userID)
-	if err != nil {
-		return err
-	}
-	_, err = n.session.ChannelMessageSendComplex(
-		dmChannel.ID,
+func (n *discordNotifier) SendComplexMessage(channelID string, data *discordgo.MessageSend) error {
+	_, err := n.session.ChannelMessageSendComplex(
+		channelID,
 		data,
 	)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (n *discordNotifier) CreateDMChannel(userID string) (string, error) {
+	dmChannel, err := n.session.UserChannelCreate(userID)
+	if err != nil {
+		return "", err
+	}
+	return dmChannel.ID, nil
 }
