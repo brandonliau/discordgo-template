@@ -54,18 +54,18 @@ func EphemeralEmbedResponse(e *discordgo.MessageEmbed) *discordgo.InteractionRes
 	}
 }
 
+func AddComponent(rsp *discordgo.InteractionResponse, c ...discordgo.MessageComponent) *discordgo.InteractionResponse {
+	rsp.Data.Components = []discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: c,
+		},
+	}
+	return rsp
+}
+
 func ModalResponse(ird *discordgo.InteractionResponseData) *discordgo.InteractionResponse {
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: ird,
 	}
-}
-
-func AddComponent(ir *discordgo.InteractionResponse, c ...discordgo.MessageComponent) *discordgo.InteractionResponse {
-	ir.Data.Components = []discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: c,
-		},
-	}
-	return ir
 }
