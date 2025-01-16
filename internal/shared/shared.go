@@ -16,6 +16,13 @@ type CmdArgs struct {
 	UserID      string
 }
 
+func Response(t discordgo.InteractionResponseType, d *discordgo.InteractionResponseData) *discordgo.InteractionResponse {
+	return &discordgo.InteractionResponse{
+		Type: t,
+		Data: d,
+	}
+}
+
 func ContentResponse(c string) *discordgo.InteractionResponse {
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -61,11 +68,4 @@ func AddComponent(rsp *discordgo.InteractionResponse, c ...discordgo.MessageComp
 		},
 	}
 	return rsp
-}
-
-func ModalResponse(ird *discordgo.InteractionResponseData) *discordgo.InteractionResponse {
-	return &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseModal,
-		Data: ird,
-	}
 }
