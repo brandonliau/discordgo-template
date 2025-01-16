@@ -32,7 +32,7 @@ func (c *buttonCommand) Auth() bool {
 
 func (c *buttonCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
 	rsp := shared.EphemeralEmbedResponse(c.buttonEmbed())
-	rsp = shared.AddComponent(rsp, component.NewPingButton().Component(), component.NewGithubButton().Component())
+	shared.AddComponent(rsp, component.NewPingButton().Component(), component.NewGithubButton().Component())
 	return rsp, nil
 }
 
