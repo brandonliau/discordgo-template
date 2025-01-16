@@ -72,8 +72,7 @@ func main() {
 	// Register application components
 	m.RegisterComponent(component.NewPingButton())
 
-	// Update bot personalization
-	s.UpdateCustomStatus("👁️‍🗨️ Monitoring...")
+	// Bot online
 	logger.Info("Bot running")
 
 	// Create stop channel and block execution until a stop signal is received
