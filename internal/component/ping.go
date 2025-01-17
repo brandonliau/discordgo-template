@@ -19,7 +19,7 @@ func (c *pingButton) CustomID() string {
 }
 
 func (c *pingButton) Component() discordgo.MessageComponent {
-	return &discordgo.Button{
+	return discordgo.Button{
 		Label:    "Ping",
 		Style:    discordgo.PrimaryButton,
 		CustomID: "ping",
