@@ -68,6 +68,7 @@ func main() {
 	m.RegisterCommand(command.NewClearCommand(db))
 	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
 	m.RegisterCommand(command.NewButtonCommand())
+	m.RegisterCommand(command.NewCleanCommand(notifier))
 
 	// Register application components
 	m.RegisterComponent(component.NewPingButton())
