@@ -2,7 +2,7 @@ package command
 
 import (
 	"time"
-	
+
 	"DiscordTemplate/internal/notifier"
 	"DiscordTemplate/internal/shared"
 
@@ -11,13 +11,13 @@ import (
 
 type cleanCommand struct {
 	notifier notifier.Notifier
-	auth bool
+	auth     bool
 }
 
 func NewCleanCommand(notifier notifier.Notifier) *cleanCommand {
 	return &cleanCommand{
 		notifier: notifier,
-		auth: true,
+		auth:     true,
 	}
 }
 
@@ -33,7 +33,7 @@ func (c *cleanCommand) Auth() bool {
 }
 
 func (c *cleanCommand) Execute(args *shared.CmdArgs) (*discordgo.InteractionResponse, error) {
-	defer func(){
+	defer func() {
 		channel, _ := c.notifier.CreateDMChannel(args.UserID)
 		messages, _ := args.Session.ChannelMessages(channel, 100, "", "", "")
 		for len(messages) != 0 {
