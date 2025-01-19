@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	// Create logger, config, database, and service
+	// Create logger, config, and database
 	logger := logger.NewStdLogger(logger.LevelDebug)
 	cfg := config.NewDiscordConfig("./config/config.yml", logger)
 	db := database.NewSqliteDB("./database.db", logger)
@@ -41,7 +41,7 @@ func main() {
 	notifier := notifier.NewDiscordNotifier(s)
 	authenticator := authenticator.NewDiscordAuthenticator(cfg, s)
 	service := service.NewExampleService(db, logger)
-	m := manager.NewDiscordManager(s, repo, notifier, authenticator, logger)
+	m := manager.NewMockManager(s, repo, notifier, authenticator, logger)
 
 	// Add event handlers
 	s.AddHandler(m.CommandInteractionHandler)
@@ -62,6 +62,9 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to start service: %v", err)
 	}
+
+	// Retrieve application commands (mock only)
+	m.RetreiveCommands()
 
 	// Register application commands
 	m.RegisterCommand(command.NewPingCommand())
@@ -90,9 +93,9 @@ func main() {
 	}
 
 	// Remove application commands
-	_, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)
-	if err != nil {
-		logger.Error("Failed to delete application commands")
-	}
+	// _, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)
+	// if err != nil {
+	// 	logger.Error("Failed to delete application commands")
+	// }
 	logger.Info("Bot shut down")
 }

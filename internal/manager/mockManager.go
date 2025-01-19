@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"time"
+
 	"DiscordTemplate/internal/authenticator"
 	"DiscordTemplate/internal/command"
 	"DiscordTemplate/internal/component"
@@ -12,29 +14,43 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type discordManager struct {
-	session       *discordgo.Session
-	repo          repository.Repository
-	notifier      notifier.Notifier
-	authenticator authenticator.Authenticator
-	logger        logger.Logger
-	commands      map[string]command.Command
-	components    map[string]component.Component
+type mockManager struct {
+	session           *discordgo.Session
+	application       *discordgo.Application
+	retrievedCommands []*discordgo.ApplicationCommand
+	repo              repository.Repository
+	notifier          notifier.Notifier
+	authenticator     authenticator.Authenticator
+	logger            logger.Logger
+	commands          map[string]command.Command
+	components        map[string]component.Component
 }
 
-func NewDiscordManager(s *discordgo.Session, repo repository.Repository, notifier notifier.Notifier, authenticator authenticator.Authenticator, logger logger.Logger) *discordManager {
-	return &discordManager{
-		session:       s,
-		repo:          repo,
-		notifier:      notifier,
-		authenticator: authenticator,
-		logger:        logger,
-		commands:      make(map[string]command.Command),
-		components:    make(map[string]component.Component),
+func NewMockManager(s *discordgo.Session, repo repository.Repository, notifier notifier.Notifier, authenticator authenticator.Authenticator, logger logger.Logger) *mockManager {
+	return &mockManager{
+		session:           s,
+		retrievedCommands: make([]*discordgo.ApplicationCommand, 0),
+		repo:              repo,
+		notifier:          notifier,
+		authenticator:     authenticator,
+		logger:            logger,
+		commands:          make(map[string]command.Command),
+		components:        make(map[string]component.Component),
 	}
 }
 
-func (m *discordManager) RegisterCommand(c command.Command) {
+func (m *mockManager) RetreiveCommands() {
+	var err error
+	for m.application == nil {
+		time.Sleep(1 * time.Second)
+	}
+	m.retrievedCommands, err = m.session.ApplicationCommands(m.application.ID, "")
+	if err != nil {
+		m.logger.Error("Failed to retrieve application commands")
+	}
+}
+
+func (m *mockManager) RegisterCommand(c command.Command) {
 	cname := c.Command().Name
 	if _, ok := m.commands[cname]; ok {
 		m.logger.Warn("Application command %s already registered", cname)
@@ -48,7 +64,7 @@ func (m *discordManager) RegisterCommand(c command.Command) {
 	m.logger.Debug("Registered command %v", cname)
 }
 
-func (m *discordManager) RegisterComponent(c component.Component) {
+func (m *mockManager) RegisterComponent(c component.Component) {
 	cname := c.CustomID()
 	if _, ok := m.components[cname]; ok {
 		m.logger.Warn("Application component %s already registered", cname)
@@ -58,7 +74,7 @@ func (m *discordManager) RegisterComponent(c component.Component) {
 	m.logger.Debug("Registered component %v", cname)
 }
 
-func (m *discordManager) CommandInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (m *mockManager) CommandInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var userID string
 	if i.Member != nil {
 		userID = i.Member.User.ID
@@ -95,7 +111,7 @@ func (m *discordManager) CommandInteractionHandler(s *discordgo.Session, i *disc
 	}
 }
 
-func (m *discordManager) ComponentInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (m *mockManager) ComponentInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var userID string
 	if i.Member != nil {
 		userID = i.Member.User.ID
@@ -128,7 +144,7 @@ func (m *discordManager) ComponentInteractionHandler(s *discordgo.Session, i *di
 	}
 }
 
-func (m *discordManager) ModalInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (m *mockManager) ModalInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var userID string
 	if i.Member != nil {
 		userID = i.Member.User.ID
