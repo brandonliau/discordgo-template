@@ -1,8 +1,8 @@
 package command
 
 import (
-	"DiscordTemplate/internal/shared"
-	"DiscordTemplate/pkg/database"
+	"discord-template/internal/shared"
+	"discord-template/pkg/database"
 
 	"github.com/bwmarrin/discordgo"
 )

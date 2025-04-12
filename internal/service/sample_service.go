@@ -1,8 +1,8 @@
 package service
 
 import (
-	"DiscordTemplate/pkg/database"
-	"DiscordTemplate/pkg/logger"
+	"discord-template/pkg/database"
+	"discord-template/pkg/logger"
 )
 
 type exampleServices struct {

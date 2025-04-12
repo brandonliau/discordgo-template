@@ -1,4 +1,4 @@
-module DiscordTemplate
+module discord-template
 
 go 1.23.1
 

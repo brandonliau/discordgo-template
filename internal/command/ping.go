@@ -3,7 +3,7 @@ package command
 import (
 	"fmt"
 
-	"DiscordTemplate/internal/shared"
+	"discord-template/internal/shared"
 
 	"github.com/bwmarrin/discordgo"
 )

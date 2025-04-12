@@ -3,8 +3,8 @@ package command
 import (
 	"time"
 
-	"DiscordTemplate/internal/notifier"
-	"DiscordTemplate/internal/shared"
+	"discord-template/internal/notifier"
+	"discord-template/internal/shared"
 
 	"github.com/bwmarrin/discordgo"
 )

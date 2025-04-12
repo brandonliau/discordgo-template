@@ -3,13 +3,13 @@ package manager
 import (
 	"time"
 
-	"DiscordTemplate/internal/authenticator"
-	"DiscordTemplate/internal/command"
-	"DiscordTemplate/internal/component"
-	"DiscordTemplate/internal/notifier"
-	"DiscordTemplate/internal/repository"
-	"DiscordTemplate/internal/shared"
-	"DiscordTemplate/pkg/logger"
+	"discord-template/internal/authenticator"
+	"discord-template/internal/command"
+	"discord-template/internal/component"
+	"discord-template/internal/notifier"
+	"discord-template/internal/repository"
+	"discord-template/internal/shared"
+	"discord-template/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
 )

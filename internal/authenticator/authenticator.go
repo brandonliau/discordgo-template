@@ -1,7 +1,7 @@
 package authenticator
 
 import (
-	"DiscordTemplate/internal/command"
+	"discord-template/internal/command"
 )
 
 type Authenticator interface {

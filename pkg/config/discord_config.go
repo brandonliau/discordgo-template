@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"DiscordTemplate/pkg/logger"
+	"discord-template/pkg/logger"
 
 	"gopkg.in/yaml.v3"
 )

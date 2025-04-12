@@ -3,8 +3,8 @@ package authenticator
 import (
 	"slices"
 
-	"DiscordTemplate/internal/command"
-	"DiscordTemplate/pkg/config"
+	"discord-template/internal/command"
+	"discord-template/pkg/config"
 
 	"github.com/bwmarrin/discordgo"
 )

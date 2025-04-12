@@ -1,7 +1,7 @@
 package component
 
 import (
-	"DiscordTemplate/internal/shared"
+	"discord-template/internal/shared"
 
 	"github.com/bwmarrin/discordgo"
 )

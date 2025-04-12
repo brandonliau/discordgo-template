@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"os"
 
-	"DiscordTemplate/pkg/logger"
+	"discord-template/pkg/logger"
 )
 
 type SqliteDB struct {
