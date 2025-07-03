@@ -2,11 +2,8 @@ package config
 
 import (
 	"fmt"
-	"os"
 
 	"discord-template/pkg/logger"
-
-	"gopkg.in/yaml.v3"
 )
 
 type DiscordConfig struct {
@@ -20,7 +17,7 @@ func NewDiscordConfig(file string, logger logger.Logger) *DiscordConfig {
 	cfg := &DiscordConfig{
 		logger: logger,
 	}
-	err := cfg.load(file)
+	err := load(file, cfg)
 	if err != nil {
 		logger.Fatal("Failed to load config file: %v", err)
 	}
@@ -29,18 +26,6 @@ func NewDiscordConfig(file string, logger logger.Logger) *DiscordConfig {
 		logger.Fatal("Failed to validate config file: %v", err)
 	}
 	return cfg
-}
-
-func (c *DiscordConfig) load(file string) error {
-	yamlFile, err := os.ReadFile(file)
-	if err != nil {
-		return fmt.Errorf("readfile: %v", err)
-	}
-	err = yaml.Unmarshal(yamlFile, c)
-	if err != nil {
-		return fmt.Errorf("unmarshal: %v", err)
-	}
-	return nil
 }
 
 func (c *DiscordConfig) validate() error {
