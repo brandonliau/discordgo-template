@@ -4,51 +4,77 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"discord-template/pkg/config"
-	"discord-template/pkg/database"
-	"discord-template/pkg/logger"
+	"discordgo-template/internal/application/usecase"
+	"discordgo-template/internal/config"
+	"discordgo-template/internal/infrastructure/external"
+	"discordgo-template/internal/infrastructure/persistence/sqlite"
+	"discordgo-template/internal/interfaces/discord"
+	"discordgo-template/internal/interfaces/discord/command"
 
-	"discord-template/internal/authenticator"
-	"discord-template/internal/command"
-	"discord-template/internal/component"
-	"discord-template/internal/manager"
-	"discord-template/internal/notifier"
-	"discord-template/internal/repository"
-	"discord-template/internal/service"
+	"discordgo-template/pkg/database"
+	"discordgo-template/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
-	// Create logger, config, database, and service
-	logger := logger.NewStdLogger(logger.LevelDebug)
-	cfg := config.NewDiscordConfig("./config/config.yml", logger)
-	db := database.NewSqliteDB("./database.db", logger)
+	// Create logger
+	logger := logger.NewStdLogger(logger.LevelInfo)
+
+	// Create config
+	cfg, err := config.NewYamlConfig("./config/config.yml")
+	if err != nil {
+		logger.Fatal("Failed to create config: %v", err)
+	}
+
+	// Create database
+	db, err := database.NewSqliteDB("./database.db")
+	if err != nil {
+		logger.Fatal("Failed to create database: %v", err)
+	}
 	defer db.Close()
 
-	// Create new discord session
-	s, err := discordgo.New("Bot " + cfg.Token)
+	// Perform database migrations
+	err = sqlite.Migrate(db)
 	if err != nil {
-		logger.Fatal("Failed to create discord session : %v", err)
+		logger.Fatal("Failed to migrate database: %v", err)
+	}
+
+	// Create discord session
+	s, err := discordgo.New("Bot " + cfg.Discord.Token)
+	if err != nil {
+		logger.Fatal("Failed to create discord session: %v", err)
 	}
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 
-	// Create repository, notifier, authenticator, services, and session manager
-	repo := repository.NewCommandRepository()
-	notifier := notifier.NewDiscordNotifier(s)
-	authenticator := authenticator.NewDiscordAuthenticator(cfg, s)
-	service := service.NewExampleService(db, logger)
-	m := manager.NewDiscordManager(s, repo, notifier, authenticator, logger)
+	// Create infrastructure repositories
+	userRepository := sqlite.NewUserRepository(db)
+
+	// Create ports
+	systemMonitor := external.NewSystemMonitor()
+
+	// Create application usescases
+	userService := usecase.NewUserService(userRepository)
+	systemService := usecase.NewSystemService(systemMonitor)
+
+	// Create application gateways
+	discordGateway := discord.NewGateway(s, cfg.Discord.ApplicationID, cfg.Discord.GuildID, userService, cfg.Discord, logger)
+
+	// Register application commands
+	discordGateway.RegisterCommand(command.StatusCommandDefinition(), command.StatusCommandHandler(systemService))
 
 	// Add event handlers
-	s.AddHandler(m.CommandInteractionHandler)
-	s.AddHandler(m.ComponentInteractionHandler)
-	s.AddHandler(m.ReadyHandler)
-	s.AddHandler(m.ResumedHandler)
-	s.AddHandler(m.RateLimitHandler)
+	s.AddHandler(discordGateway.InteractionHandler)
+	s.AddHandler(discordGateway.ReadyHandler)
+	s.AddHandler(discordGateway.ResumedHandler)
+	s.AddHandler(discordGateway.RateLimitHandler)
+	s.AddHandler(discordGateway.MemberJoinHandler)
+	s.AddHandler(discordGateway.MemberLeaveHandler)
+
+	// Start gateway
+	discordGateway.Start()
 
 	// Establish websocket connection
 	err = s.Open()
@@ -56,24 +82,6 @@ func main() {
 		logger.Fatal("Failed to establish websocket connection : %v", err)
 	}
 	defer s.Close()
-
-	// Start service
-	err = service.Start()
-	if err != nil {
-		logger.Fatal("Failed to start service: %v", err)
-	}
-
-	// Register application commands
-	m.RegisterCommand(command.NewPingCommand())
-	m.RegisterCommand(command.NewUptimeCommand(time.Now().Unix()))
-	m.RegisterCommand(command.NewAddCommand(db))
-	m.RegisterCommand(command.NewClearCommand(db))
-	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
-	m.RegisterCommand(command.NewButtonCommand())
-	m.RegisterCommand(command.NewCleanCommand(notifier))
-
-	// Register application components
-	m.RegisterComponent(component.NewPingButton())
 
 	// Bot online
 	logger.Info("Bot running")
@@ -83,11 +91,8 @@ func main() {
 	signal.Notify(sc, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-sc
 
-	// Stop service
-	err = service.Stop()
-	if err != nil {
-		logger.Error("Failed to stop service: %v", err)
-	}
+	// Stop application gateways
+	discordGateway.Stop()
 
 	// Remove application commands
 	_, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)

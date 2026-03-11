@@ -1,6 +1,6 @@
-module discord-template
+module discordgo-template
 
-go 1.23.1
+go 1.25.6
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
