@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_users_userid ON users(id);
+CREATE INDEX IF NOT EXISTS idx_users_id ON users(id);

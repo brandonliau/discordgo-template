@@ -51,6 +51,7 @@ func main() {
 
 	// Create infrastructure repositories
 	userRepository := sqlite.NewUserRepository(db)
+	identityResolver := sqlite.NewIdentityResolver(db)
 
 	// Create ports
 	systemMonitor := external.NewSystemMonitor()
@@ -60,7 +61,7 @@ func main() {
 	systemService := usecase.NewSystemService(systemMonitor)
 
 	// Create application gateways
-	discordGateway := discord.NewGateway(s, cfg.Discord.ApplicationID, cfg.Discord.GuildID, userService, cfg.Discord, logger)
+	discordGateway := discord.NewGateway(s, cfg.Discord.ApplicationID, cfg.Discord.GuildID, userService, identityResolver, cfg.Discord, logger)
 
 	// Register application commands
 	discordGateway.RegisterCommand(command.StatusCommandDefinition(), command.StatusCommandHandler(systemService))
