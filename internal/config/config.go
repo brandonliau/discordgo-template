@@ -11,7 +11,7 @@ type Config struct {
 	Discord *DiscordConfig `yaml:"discord"`
 }
 
-// question: rename this to something else to be more representative of the configs it holds?
+// question: rename this to something else to be more representative of the configs it holds
 func NewYamlConfig(file string) (*Config, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {

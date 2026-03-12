@@ -5,6 +5,7 @@ import (
 
 	"discordgo-template/internal/application/usecase"
 	"discordgo-template/internal/config"
+	"discordgo-template/internal/domain/user"
 	"discordgo-template/internal/interfaces/discord/interaction"
 
 	"discordgo-template/pkg/logger"
@@ -13,24 +14,26 @@ import (
 )
 
 type gateway struct {
-	session       *discordgo.Session
-	applicationID string
-	guildID       string
-	userService   *usecase.UserService
-	handleFuncs   map[string]interaction.HandleFunc
-	cfg           *config.DiscordConfig
-	logger        logger.Logger
+	session          *discordgo.Session
+	applicationID    string
+	guildID          string
+	handleFuncs      map[string]interaction.HandleFunc
+	userService      *usecase.UserService
+	identityResolver user.IdentityResolver
+	cfg              *config.DiscordConfig
+	logger           logger.Logger
 }
 
-func NewGateway(session *discordgo.Session, applicationID string, guildID string, userService *usecase.UserService, cfg *config.DiscordConfig, logger logger.Logger) *gateway {
+func NewGateway(session *discordgo.Session, applicationID string, guildID string, userService *usecase.UserService, identityResolver user.IdentityResolver, cfg *config.DiscordConfig, logger logger.Logger) *gateway {
 	return &gateway{
-		session:       session,
-		applicationID: applicationID,
-		guildID:       guildID,
-		userService:   userService,
-		handleFuncs:   make(map[string]interaction.HandleFunc),
-		cfg:           cfg,
-		logger:        logger,
+		session:          session,
+		applicationID:    applicationID,
+		guildID:          guildID,
+		handleFuncs:      make(map[string]interaction.HandleFunc),
+		userService:      userService,
+		identityResolver: identityResolver,
+		cfg:              cfg,
+		logger:           logger,
 	}
 }
 

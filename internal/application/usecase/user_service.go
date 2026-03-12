@@ -17,7 +17,6 @@ func NewUserService(userRepository user.UserRepository) *UserService {
 }
 
 // --- Get User ---
-// question: [UserID string] or [ID string]
 type GetUserRequest struct {
 	ID uuid.UUID
 }
@@ -52,7 +51,6 @@ func (s *UserService) GetAll(req GetAllUsersRequest) (*GetAllUsersResult, error)
 }
 
 // --- User Join ---
-// question: [UserID string] or [ID string]
 type UserJoinRequest struct{}
 
 type UserJoinResult struct {
@@ -70,7 +68,6 @@ func (s *UserService) Join(req UserJoinRequest) (*UserJoinResult, error) {
 }
 
 // --- User Leave ---
-// question: [UserID string] or [ID string]
 type UserLeaveRequest struct {
 	ID uuid.UUID
 }

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
-    user_id             TEXT,
-    UNIQUE (user_id)
+    id TEXT,
+    UNIQUE (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_users_userid ON users(user_id);
+CREATE INDEX IF NOT EXISTS idx_users_userid ON users(id);

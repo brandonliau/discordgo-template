@@ -2,6 +2,7 @@ package discord
 
 import (
 	"discordgo-template/internal/application/usecase"
+	"discordgo-template/internal/domain/user"
 	"discordgo-template/internal/interfaces/discord/interaction"
 
 	"github.com/bwmarrin/discordgo"
@@ -70,9 +71,13 @@ func (g *gateway) MemberJoinHandler(s *discordgo.Session, m *discordgo.GuildMemb
 }
 
 func (g *gateway) MemberLeaveHandler(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
-	// resolve user id from external id here
+	userID, err := g.identityResolver.Resolve(user.ProviderDiscord, m.User.ID)
+	if err != nil {
+		g.logger.Error("Failed to resolve user id from external id %s: %v", m.User.ID, err)
+		return
+	}
 
-	_, err := g.userService.Leave(usecase.UserLeaveRequest{ID: m.User.ID})
+	_, err = g.userService.Leave(usecase.UserLeaveRequest{ID: userID})
 	if err != nil {
 		g.logger.Error("Failed to remove user on leave %s: %v", m.User.ID, err)
 		return

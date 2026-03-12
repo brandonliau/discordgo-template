@@ -27,7 +27,7 @@ func NewUserRepository(db *database.SqliteDB) *UserRepositoryImpl {
 
 func (r *UserRepositoryImpl) Create(usr *user.User) error {
 	err := r.db.Exec(
-		`INSERT INTO users (user_id)
+		`INSERT INTO users (id)
 		 VALUES (?)`,
 		usr.ID,
 	)
@@ -45,7 +45,7 @@ func (r *UserRepositoryImpl) Create(usr *user.User) error {
 func (r *UserRepositoryImpl) Save(usr *user.User) error {
 	return r.db.Exec(
 		`UPDATE users
-		 WHERE user_id = ?`,
+		 WHERE id = ?`,
 		usr.ID,
 	)
 }
@@ -53,16 +53,16 @@ func (r *UserRepositoryImpl) Save(usr *user.User) error {
 func (r *UserRepositoryImpl) Delete(usr *user.User) error {
 	return r.db.Exec(
 		`DELETE FROM users
-		 WHERE user_id = ?`,
+		 WHERE id = ?`,
 		usr.ID,
 	)
 }
 
 func (r *UserRepositoryImpl) Get(id uuid.UUID) (*user.User, error) {
 	row, err := r.db.QueryRow(
-		`SELECT user_id
+		`SELECT id
 		 FROM users
-		 WHERE user_id = ?`,
+		 WHERE id = ?`,
 		id,
 	)
 	if err != nil {
@@ -83,7 +83,7 @@ func (r *UserRepositoryImpl) Get(id uuid.UUID) (*user.User, error) {
 
 func (r *UserRepositoryImpl) GetAll() ([]*user.User, error) {
 	rows, err := r.db.Query(
-		`SELECT user_id
+		`SELECT id
 		 FROM users`,
 	)
 	if err != nil {

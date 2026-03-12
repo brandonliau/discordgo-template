@@ -4,15 +4,19 @@ import (
 	"github.com/google/uuid"
 )
 
-// todo: implement identity to map internal uuids to external (discord) user IDs
+type Provider string
+
+const (
+	ProviderEmail   Provider = "email"
+	ProviderDiscord Provider = "discord"
+)
+
 type Identity struct {
-	Provider   string // "discord", "email", etc.
+	Provider   Provider
 	ExternalID string
 }
 
 type IdentityResolver interface {
-	Resolve(provider string, externalID string) (uuid.UUID, error)
-	// question: [userID string] or [id string]
-	// question: should i make link on user so that the interfaces layer handles linking?
-	Link(userID uuid.UUID, provider string, externalID string) error
+	Resolve(provider Provider, externalID string) (uuid.UUID, error)
+	Link(userID uuid.UUID, provider Provider, externalID string) error
 }
