@@ -1,4 +1,4 @@
-module discordgo-template
+module discordgo-skeleton
 
 go 1.25.6
 

@@ -1,7 +1,7 @@
 package presentation
 
 import (
-	"discordgo-template/internal/application/usecase"
+	"discordgo-skeleton/internal/application/usecase"
 
 	"github.com/bwmarrin/discordgo"
 )

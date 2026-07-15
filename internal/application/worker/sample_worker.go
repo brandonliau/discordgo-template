@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"discordgo-template/pkg/logger"
+	"discordgo-skeleton/pkg/logger"
 )
 
 type Ticker interface {

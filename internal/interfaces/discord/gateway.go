@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"discordgo-template/internal/interfaces/discord/interaction"
+	"discordgo-skeleton/internal/interfaces/discord/interaction"
 
-	"discordgo-template/pkg/logger"
+	"discordgo-skeleton/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
 )

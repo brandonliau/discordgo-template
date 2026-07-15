@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"discordgo-template/internal/application/usecase"
-	"discordgo-template/internal/interfaces/discord/interaction"
-	"discordgo-template/internal/interfaces/discord/presentation"
+	"discordgo-skeleton/internal/application/usecase"
+	"discordgo-skeleton/internal/interfaces/discord/interaction"
+	"discordgo-skeleton/internal/interfaces/discord/presentation"
 
 	"github.com/bwmarrin/discordgo"
 )

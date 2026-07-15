@@ -1,10 +1,10 @@
 package command
 
 import (
-	"discordgo-template/internal/application/usecase"
-	"discordgo-template/internal/interfaces/discord/component"
-	"discordgo-template/internal/interfaces/discord/interaction"
-	"discordgo-template/internal/interfaces/discord/presentation"
+	"discordgo-skeleton/internal/application/usecase"
+	"discordgo-skeleton/internal/interfaces/discord/component"
+	"discordgo-skeleton/internal/interfaces/discord/interaction"
+	"discordgo-skeleton/internal/interfaces/discord/presentation"
 
 	"github.com/bwmarrin/discordgo"
 )

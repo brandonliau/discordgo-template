@@ -5,16 +5,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"discordgo-template/internal/application/usecase"
-	"discordgo-template/internal/application/worker"
-	"discordgo-template/internal/config"
-	"discordgo-template/internal/infrastructure/persistence/sqlite"
-	"discordgo-template/internal/interfaces/discord"
-	"discordgo-template/internal/interfaces/discord/command"
-	"discordgo-template/internal/interfaces/discord/component"
+	"discordgo-skeleton/internal/application/usecase"
+	"discordgo-skeleton/internal/application/worker"
+	"discordgo-skeleton/internal/config"
+	"discordgo-skeleton/internal/infrastructure/persistence/sqlite"
+	"discordgo-skeleton/internal/interfaces/discord"
+	"discordgo-skeleton/internal/interfaces/discord/command"
+	"discordgo-skeleton/internal/interfaces/discord/component"
 
-	"discordgo-template/pkg/database"
-	"discordgo-template/pkg/logger"
+	"discordgo-skeleton/pkg/database"
+	"discordgo-skeleton/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
 )

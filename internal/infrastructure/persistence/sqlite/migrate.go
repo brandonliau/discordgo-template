@@ -4,7 +4,7 @@ import (
 	"embed"
 	"io/fs"
 
-	"discordgo-template/pkg/database"
+	"discordgo-skeleton/pkg/database"
 )
 
 //go:embed migrations/*.sql

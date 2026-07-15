@@ -1,4 +1,4 @@
-# discord-template
+# discordgo-skeleton
 This repository contains the skeleton code required to build a new Discord bot in Go. It includes predefined structs for managing commands, loggers, databases, and Discord interactions. This should allow you to customize and build a scalable bot quickly and easily.
 
 ## Installation

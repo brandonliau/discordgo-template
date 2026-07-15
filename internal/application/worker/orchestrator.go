@@ -3,7 +3,7 @@ package worker
 import (
 	"fmt"
 
-	"discordgo-template/pkg/logger"
+	"discordgo-skeleton/pkg/logger"
 )
 
 type registeredWorker struct {
