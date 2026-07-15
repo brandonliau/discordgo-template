@@ -1,0 +1,7 @@
+discord:
+  token:
+  application_id:
+  guild_id:
+
+worker:
+  interval:

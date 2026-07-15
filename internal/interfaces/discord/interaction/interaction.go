@@ -2,53 +2,44 @@ package interaction
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
-
-	"discordgo-template/pkg/utils"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-type HandleFunc func(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error)
+type HandleFunc func(*discordgo.Session, *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error)
 
-func GetUserID(i *discordgo.InteractionCreate) string {
-	if i.Member != nil {
-		return i.Member.User.ID
+func EncodeCustomID(routingKey string, params url.Values) (string, error) {
+	if strings.TrimSpace(routingKey) == "" || strings.ContainsAny(routingKey, "?&=") {
+		return "", fmt.Errorf("invalid routing key %q", routingKey)
 	}
-	return i.User.ID
+	customID := routingKey
+	if len(params) > 0 {
+		customID += "?" + params.Encode()
+	}
+	if len(customID) > 100 {
+		return "", fmt.Errorf("custom ID exceeds Discord's 100-character limit")
+	}
+	return customID, nil
 }
 
-func ParseInteractionOptions(i *discordgo.InteractionCreate) map[string]*discordgo.ApplicationCommandInteractionDataOption {
-	options := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(i.ApplicationCommandData().Options))
-	for _, opt := range i.ApplicationCommandData().Options {
-		options[opt.Name] = opt
+func DecodeCustomID(customID string) (string, url.Values, error) {
+	routingKey, query, hasQuery := strings.Cut(customID, "?")
+	if strings.TrimSpace(routingKey) == "" {
+		return "", nil, fmt.Errorf("custom ID has no routing key")
 	}
-	return options
+	if !hasQuery {
+		return routingKey, make(url.Values), nil
+	}
+	params, err := url.ParseQuery(query)
+	if err != nil {
+		return "", nil, fmt.Errorf("decode custom ID: %w", err)
+	}
+	return routingKey, params, nil
 }
 
-func EncodeCustomID[T any](customID string, data ...utils.KeyValue[string, T]) string {
-	if len(data) > 0 {
-		params := make([]string, 0, len(data))
-		for _, pair := range data {
-			params = append(params, pair.Key+"="+fmt.Sprint(pair.Value))
-		}
-		customID += "?" + strings.Join(params, "&")
-	}
-
-	return customID
-}
-
-func DecodeCustomID(customID string) (string, map[string]string) {
-	routingKey := customID
-	params := make(map[string]string)
-	if key, query, ok := strings.Cut(customID, "?"); ok {
-		routingKey = key
-		for pair := range strings.SplitSeq(query, "&") {
-			if k, v, ok := strings.Cut(pair, "="); ok {
-				params[k] = v
-			}
-		}
-	}
-
-	return routingKey, params
+func RoutingKey(customID string) (string, error) {
+	key, _, err := DecodeCustomID(customID)
+	return key, err
 }
