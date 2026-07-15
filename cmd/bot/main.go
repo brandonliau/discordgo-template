@@ -4,76 +4,102 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"discord-template/pkg/config"
-	"discord-template/pkg/database"
-	"discord-template/pkg/logger"
+	"discordgo-template/internal/application/usecase"
+	"discordgo-template/internal/application/worker"
+	"discordgo-template/internal/config"
+	"discordgo-template/internal/infrastructure/persistence/sqlite"
+	"discordgo-template/internal/interfaces/discord"
+	"discordgo-template/internal/interfaces/discord/command"
+	"discordgo-template/internal/interfaces/discord/component"
 
-	"discord-template/internal/authenticator"
-	"discord-template/internal/command"
-	"discord-template/internal/component"
-	"discord-template/internal/manager"
-	"discord-template/internal/notifier"
-	"discord-template/internal/repository"
-	"discord-template/internal/service"
+	"discordgo-template/pkg/database"
+	"discordgo-template/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
-	_ "modernc.org/sqlite"
 )
 
 func main() {
-	// Create logger, config, database, and service
-	logger := logger.NewStdLogger(logger.LevelDebug)
-	cfg := config.NewDiscordConfig("./config/config.yml", logger)
-	db := database.NewSqliteDB("./database.db", logger)
+	// Create logger
+	logger := logger.NewStdLogger(logger.LevelInfo)
+
+	// Create config
+	cfg, err := config.Load("./config/config.yml")
+	if err != nil {
+		logger.Fatal("Failed to create config: %v", err)
+	}
+
+	// Create database
+	db, err := database.NewSqliteDB(cfg.Database.Path)
+	if err != nil {
+		logger.Fatal("Failed to create database: %v", err)
+	}
 	defer db.Close()
 
-	// Create new discord session
-	s, err := discordgo.New("Bot " + cfg.Token)
+	// Perform database migrations
+	err = sqlite.Migrate(db)
 	if err != nil {
-		logger.Fatal("Failed to create discord session : %v", err)
+		logger.Fatal("Failed to migrate database: %v", err)
 	}
-	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 
-	// Create repository, notifier, authenticator, services, and session manager
-	repo := repository.NewCommandRepository()
-	notifier := notifier.NewDiscordNotifier(s)
-	authenticator := authenticator.NewDiscordAuthenticator(cfg, s)
-	service := service.NewExampleService(db, logger)
-	m := manager.NewDiscordManager(s, repo, notifier, authenticator, logger)
-
-	// Add event handlers
-	s.AddHandler(m.CommandInteractionHandler)
-	s.AddHandler(m.ComponentInteractionHandler)
-	s.AddHandler(m.ReadyHandler)
-	s.AddHandler(m.ResumedHandler)
-	s.AddHandler(m.RateLimitHandler)
-
-	// Establish websocket connection
-	err = s.Open()
+	// Create discord session
+	s, err := discordgo.New("Bot " + cfg.Discord.Token)
 	if err != nil {
-		logger.Fatal("Failed to establish websocket connection : %v", err)
+		logger.Fatal("Failed to create discord session: %v", err)
 	}
-	defer s.Close()
+	s.Identify.Intents = discordgo.IntentsGuilds
 
-	// Start service
-	err = service.Start()
-	if err != nil {
-		logger.Fatal("Failed to start service: %v", err)
-	}
+	// Create application usecases
+	sampleService := usecase.NewSampleService()
+
+	// Create application gateway
+	discordGateway := discord.NewGateway(
+		s,
+		cfg.Discord.ApplicationID,
+		cfg.Discord.GuildID,
+		logger,
+	)
 
 	// Register application commands
-	m.RegisterCommand(command.NewPingCommand())
-	m.RegisterCommand(command.NewUptimeCommand(time.Now().Unix()))
-	m.RegisterCommand(command.NewAddCommand(db))
-	m.RegisterCommand(command.NewClearCommand(db))
-	m.RegisterCommand(command.NewRetrieveCommand(db, logger))
-	m.RegisterCommand(command.NewButtonCommand())
-	m.RegisterCommand(command.NewCleanCommand(notifier))
+	err = discordGateway.RegisterCommand(
+		command.SampleDefinition(),
+		command.SampleHandler(sampleService),
+	)
+	if err != nil {
+		logger.Fatal("Failed to register application command: %v", err)
+	}
 
 	// Register application components
-	m.RegisterComponent(component.NewPingButton())
+	sampleButton, err := component.SampleDefinition(0)
+	if err != nil {
+		logger.Fatal("Failed to create sample component: %v", err)
+	}
+	err = discordGateway.RegisterComponent(
+		sampleButton,
+		component.SampleHandler(sampleService),
+	)
+	if err != nil {
+		logger.Fatal("Failed to register application component: %v", err)
+	}
+
+	// Register application services
+	orchestrator := worker.NewOrchestrator(logger)
+	orchestrator.RegisterWorker(
+		"sample",
+		worker.NewSampleWorker(cfg.SampleWorker.Interval.Duration, logger),
+	)
+
+	// Start gateway
+	err = discordGateway.Start()
+	if err != nil {
+		logger.Fatal("Failed to start discord gateway: %v", err)
+	}
+
+	// Start workers
+	err = orchestrator.StartAll()
+	if err != nil {
+		logger.Fatal("Failed to start services: %v", err)
+	}
 
 	// Bot online
 	logger.Info("Bot running")
@@ -83,16 +109,17 @@ func main() {
 	signal.Notify(sc, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-sc
 
-	// Stop service
-	err = service.Stop()
+	// Stop workers
+	err = orchestrator.StopAll()
 	if err != nil {
-		logger.Error("Failed to stop service: %v", err)
+		logger.Error("Failed to stop services: %v", err)
 	}
 
-	// Remove application commands
-	_, err = s.ApplicationCommandBulkOverwrite(s.State.User.ID, "", nil)
+	// Stop gateway
+	err = discordGateway.Stop()
 	if err != nil {
-		logger.Error("Failed to delete application commands")
+		logger.Error("Failed to stop discord gateway: %v", err)
 	}
+
 	logger.Info("Bot shut down")
 }
