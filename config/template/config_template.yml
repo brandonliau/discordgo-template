@@ -3,5 +3,3 @@ discord:
   application_id:
   guild_id:
 
-worker:
-  interval:

@@ -6,9 +6,10 @@ import (
 	"syscall"
 
 	"discordgo-skeleton/internal/application/usecase"
-	"discordgo-skeleton/internal/application/worker"
 	"discordgo-skeleton/internal/config"
+	"discordgo-skeleton/internal/infrastructure/openmeteo"
 	"discordgo-skeleton/internal/infrastructure/persistence/sqlite"
+	"discordgo-skeleton/internal/infrastructure/zippopotam"
 	"discordgo-skeleton/internal/interfaces/discord"
 	"discordgo-skeleton/internal/interfaces/discord/command"
 	"discordgo-skeleton/internal/interfaces/discord/component"
@@ -17,6 +18,7 @@ import (
 	"discordgo-skeleton/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
@@ -30,7 +32,7 @@ func main() {
 	}
 
 	// Create database
-	db, err := database.NewSqliteDB(cfg.Database.Path)
+	db, err := database.NewSqliteDB("./discordgo-skeleton.db")
 	if err != nil {
 		logger.Fatal("Failed to create database: %v", err)
 	}
@@ -49,56 +51,55 @@ func main() {
 	}
 	s.Identify.Intents = discordgo.IntentsGuilds
 
+	// Create infrastructure repositories
+	pinRepository := sqlite.NewPinRepository(db)
+
+	// Create ports
+	geocoder := zippopotam.NewGeocoder()
+	weatherFeed := openmeteo.NewWeatherFeed()
+
 	// Create application usecases
-	sampleService := usecase.NewSampleService()
+	weatherService := usecase.NewWeatherService(geocoder, weatherFeed, pinRepository)
+	pinService := usecase.NewPinService(pinRepository, geocoder)
 
 	// Create application gateway
-	discordGateway := discord.NewGateway(
-		s,
-		cfg.Discord.ApplicationID,
-		cfg.Discord.GuildID,
-		logger,
-	)
+	discordGateway := discord.NewGateway(s, cfg.Discord.ApplicationID, cfg.Discord.GuildID, logger)
 
 	// Register application commands
-	err = discordGateway.RegisterCommand(
-		command.SampleDefinition(),
-		command.SampleHandler(sampleService),
-	)
+	err = discordGateway.RegisterCommand(command.RandomDefinition(), command.RandomHandler(weatherService))
 	if err != nil {
-		logger.Fatal("Failed to register application command: %v", err)
+		logger.Fatal("Failed to register command: %v", err)
+	}
+	err = discordGateway.RegisterCommand(command.SearchDefinition(), command.SearchHandler(weatherService))
+	if err != nil {
+		logger.Fatal("Failed to register command: %v", err)
+	}
+	err = discordGateway.RegisterCommand(command.AddDefinition(), command.AddHandler(pinService))
+	if err != nil {
+		logger.Fatal("Failed to register command: %v", err)
+	}
+	err = discordGateway.RegisterCommand(command.RemoveDefinition(), command.RemoveHandler(pinService))
+	if err != nil {
+		logger.Fatal("Failed to register command: %v", err)
+	}
+	err = discordGateway.RegisterCommand(command.ListDefinition(), command.ListHandler(weatherService))
+	if err != nil {
+		logger.Fatal("Failed to register command: %v", err)
 	}
 
 	// Register application components
-	sampleButton, err := component.SampleDefinition(0)
+	err = discordGateway.RegisterComponent(component.RefreshDefinition(), component.RefreshHandler(weatherService))
 	if err != nil {
-		logger.Fatal("Failed to create sample component: %v", err)
-	}
-	err = discordGateway.RegisterComponent(
-		sampleButton,
-		component.SampleHandler(sampleService),
-	)
-	if err != nil {
-		logger.Fatal("Failed to register application component: %v", err)
+		logger.Fatal("Failed to register component: %v", err)
 	}
 
-	// Register application services
-	orchestrator := worker.NewOrchestrator(logger)
-	orchestrator.RegisterWorker(
-		"sample",
-		worker.NewSampleWorker(cfg.SampleWorker.Interval.Duration, logger),
-	)
+	// Add event handlers
+	s.AddHandler(discordGateway.InteractionHandler)
 
-	// Start gateway
+	// Start discord gateway
 	err = discordGateway.Start()
 	if err != nil {
-		logger.Fatal("Failed to start discord gateway: %v", err)
-	}
-
-	// Start workers
-	err = orchestrator.StartAll()
-	if err != nil {
-		logger.Fatal("Failed to start services: %v", err)
+		logger.Fatal("Failed to start gateway: %v", err)
 	}
 
 	// Bot online
@@ -109,16 +110,10 @@ func main() {
 	signal.Notify(sc, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-sc
 
-	// Stop workers
-	err = orchestrator.StopAll()
-	if err != nil {
-		logger.Error("Failed to stop services: %v", err)
-	}
-
-	// Stop gateway
+	// Stop discord gateway
 	err = discordGateway.Stop()
 	if err != nil {
-		logger.Error("Failed to stop discord gateway: %v", err)
+		logger.Fatal("Failed to stop gateway: %v", err)
 	}
 
 	logger.Info("Bot shut down")

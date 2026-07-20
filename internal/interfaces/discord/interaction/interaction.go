@@ -10,6 +10,25 @@ import (
 
 type HandleFunc func(*discordgo.Session, *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error)
 
+func GetUserID(i *discordgo.InteractionCreate) string {
+	if i.Member != nil && i.Member.User != nil {
+		return i.Member.User.ID
+	}
+	if i.User != nil {
+		return i.User.ID
+	}
+	return ""
+}
+
+func ParseInteractionOptions(i *discordgo.InteractionCreate) map[string]*discordgo.ApplicationCommandInteractionDataOption {
+	options := i.ApplicationCommandData().Options
+	parsed := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+	for _, opt := range options {
+		parsed[opt.Name] = opt
+	}
+	return parsed
+}
+
 func EncodeCustomID(routingKey string, params url.Values) (string, error) {
 	if strings.TrimSpace(routingKey) == "" || strings.ContainsAny(routingKey, "?&=") {
 		return "", fmt.Errorf("invalid routing key %q", routingKey)
@@ -37,9 +56,4 @@ func DecodeCustomID(customID string) (string, url.Values, error) {
 		return "", nil, fmt.Errorf("decode custom ID: %w", err)
 	}
 	return routingKey, params, nil
-}
-
-func RoutingKey(customID string) (string, error) {
-	key, _, err := DecodeCustomID(customID)
-	return key, err
 }

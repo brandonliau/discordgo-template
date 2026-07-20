@@ -1,5 +1,0 @@
-CREATE TABLE samples (
-    id INTEGER PRIMARY KEY,
-    message TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);

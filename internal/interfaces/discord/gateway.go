@@ -1,10 +1,9 @@
 package discord
 
 import (
-	"errors"
 	"fmt"
-	"sync"
-
+	"strings"
+	
 	"discordgo-skeleton/internal/interfaces/discord/interaction"
 
 	"discordgo-skeleton/pkg/logger"
@@ -12,187 +11,88 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Gateway struct {
+type gateway struct {
 	session       *discordgo.Session
 	applicationID string
 	guildID       string
+	handleFuncs   map[string]interaction.HandleFunc
 	logger        logger.Logger
-
-	mu          sync.RWMutex
-	handlers    map[string]interaction.HandleFunc
-	commands    []*discordgo.ApplicationCommand
-	started     bool
-	removeEvent func()
 }
 
-func NewGateway(
-	session *discordgo.Session,
-	applicationID string,
-	guildID string,
-	logger logger.Logger,
-) *Gateway {
-	return &Gateway{
+func NewGateway(session *discordgo.Session, applicationID string, guildID string, logger logger.Logger) *gateway {
+	return &gateway{
 		session:       session,
 		applicationID: applicationID,
 		guildID:       guildID,
+		handleFuncs:   make(map[string]interaction.HandleFunc),
 		logger:        logger,
-		handlers:      make(map[string]interaction.HandleFunc),
 	}
 }
 
-func (g *Gateway) RegisterCommand(
-	definition *discordgo.ApplicationCommand,
-	handler interaction.HandleFunc,
-) error {
-	if definition == nil || definition.Name == "" {
-		return errors.New("command definition must have a name")
+func (g *gateway) Start() error {
+	err := g.session.Open()
+	if err != nil {
+		return err
 	}
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	if g.started {
-		return errors.New("cannot register a command after gateway start")
-	}
-	if _, exists := g.handlers[definition.Name]; exists {
-		return fmt.Errorf("interaction routing key %q is already registered", definition.Name)
-	}
-	g.handlers[definition.Name] = handler
-	g.commands = append(g.commands, definition)
+	g.logger.Info("Started discord gateway for application %s", g.applicationID)
 	return nil
 }
 
-func (g *Gateway) RegisterComponent(
-	definition discordgo.MessageComponent,
-	handler interaction.HandleFunc,
-) error {
+func (g *gateway) Stop() error {
+	err := g.session.Close()
+	if err != nil {
+		return err
+	}
+	g.logger.Info("Stopped discord gateway")
+	return nil
+}
+
+func (g *gateway) RegisterCommand(c *discordgo.ApplicationCommand, handleFunc interaction.HandleFunc) error {
+	if _, ok := g.handleFuncs[c.Name]; ok {
+		return fmt.Errorf("Command %s already registered", c.Name)
+	}
+
+	_, err := g.session.ApplicationCommandCreate(g.applicationID, "", c)
+	if err != nil {
+		return err
+	}
+
+	g.handleFuncs[c.Name] = handleFunc
+	g.logger.Info("Registered command %s", c.Name)
+	return nil
+}
+
+func (g *gateway) RegisterComponent(c discordgo.MessageComponent, handleFunc interaction.HandleFunc) error {
 	var customID string
-	switch component := definition.(type) {
+	switch v := c.(type) {
 	case discordgo.Button:
-		customID = component.CustomID
+		customID = v.CustomID
 	case *discordgo.Button:
-		customID = component.CustomID
+		customID = v.CustomID
 	case discordgo.SelectMenu:
-		customID = component.CustomID
+		customID = v.CustomID
 	case *discordgo.SelectMenu:
-		customID = component.CustomID
+		customID = v.CustomID
 	default:
-		return fmt.Errorf("unsupported component definition %T", definition)
-	}
-	routingKey, err := interaction.RoutingKey(customID)
-	if err != nil {
-		return fmt.Errorf("component definition: %w", err)
+		return fmt.Errorf("Unsupported component type %T", c)
 	}
 
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	if g.started {
-		return errors.New("cannot register a component after gateway start")
+	routingKey, _, _ := strings.Cut(customID, "?")
+	if _, ok := g.handleFuncs[routingKey]; ok {
+		return fmt.Errorf("Component %s already registered", routingKey)
 	}
-	if _, exists := g.handlers[routingKey]; exists {
-		return fmt.Errorf("interaction routing key %q is already registered", routingKey)
-	}
-	g.handlers[routingKey] = handler
+
+	g.handleFuncs[customID] = handleFunc
+	g.logger.Info("Registered component %s", routingKey)
 	return nil
 }
 
-func (g *Gateway) Start() error {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	if g.started {
-		return nil
+func (g *gateway) RegisterModal(modal *discordgo.InteractionResponseData, handleFunc interaction.HandleFunc) error {
+	if _, ok := g.handleFuncs[modal.CustomID]; ok {
+		return fmt.Errorf("Modal %s already registered", modal.CustomID)
 	}
 
-	g.removeEvent = g.session.AddHandler(g.handleInteraction)
-	if err := g.session.Open(); err != nil {
-		g.removeEvent()
-		g.removeEvent = nil
-		return fmt.Errorf("open Discord gateway: %w", err)
-	}
-	if _, err := g.session.ApplicationCommandBulkOverwrite(
-		g.applicationID,
-		g.guildID,
-		g.commands,
-	); err != nil {
-		g.removeEvent()
-		g.removeEvent = nil
-		return errors.Join(
-			fmt.Errorf("register Discord commands: %w", err),
-			g.session.Close(),
-		)
-	}
-	g.started = true
-	g.logger.Info("Discord gateway started with %d commands", len(g.commands))
+	g.handleFuncs[modal.CustomID] = handleFunc
+	g.logger.Info("Registered modal %s", modal.CustomID)
 	return nil
-}
-
-func (g *Gateway) Stop() error {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	if !g.started {
-		return nil
-	}
-	if g.removeEvent != nil {
-		g.removeEvent()
-		g.removeEvent = nil
-	}
-	g.started = false
-	if err := g.session.Close(); err != nil {
-		return fmt.Errorf("close Discord gateway: %w", err)
-	}
-	g.logger.Info("Discord gateway stopped")
-	return nil
-}
-
-func (g *Gateway) Dispatch(
-	session *discordgo.Session,
-	event *discordgo.InteractionCreate,
-) (*discordgo.InteractionResponse, error) {
-	customID, err := interactionID(event)
-	if err != nil {
-		return nil, err
-	}
-	routingKey, err := interaction.RoutingKey(customID)
-	if err != nil {
-		return nil, err
-	}
-
-	g.mu.RLock()
-	handler, exists := g.handlers[routingKey]
-	g.mu.RUnlock()
-	if !exists {
-		return nil, fmt.Errorf("no handler registered for %q", routingKey)
-	}
-	return handler(session, event)
-}
-
-func (g *Gateway) handleInteraction(
-	session *discordgo.Session,
-	event *discordgo.InteractionCreate,
-) {
-	response, err := g.Dispatch(session, event)
-	if err != nil {
-		g.logger.Error("interaction failed: %v", err)
-		response = interaction.InitialResponse(
-			interaction.WithContent("Something went wrong."),
-			interaction.WithEphemeral(),
-		)
-	}
-	if response == nil {
-		return
-	}
-	if err := session.InteractionRespond(event.Interaction, response); err != nil {
-		g.logger.Error("send interaction response: %v", err)
-	}
-}
-
-func interactionID(event *discordgo.InteractionCreate) (string, error) {
-	switch event.Type {
-	case discordgo.InteractionApplicationCommand:
-		return event.ApplicationCommandData().Name, nil
-	case discordgo.InteractionMessageComponent:
-		return event.MessageComponentData().CustomID, nil
-	case discordgo.InteractionModalSubmit:
-		return event.ModalSubmitData().CustomID, nil
-	default:
-		return "", fmt.Errorf("unsupported interaction type %d", event.Type)
-	}
 }

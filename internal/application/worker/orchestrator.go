@@ -6,56 +6,56 @@ import (
 	"discordgo-skeleton/pkg/logger"
 )
 
-type registeredWorker struct {
-	Worker
-	name string
+type ManagedWorker struct {
+	id     string
+	worker Worker
 }
 
 type Orchestrator struct {
-	workers     []*registeredWorker
-	workerNames map[string]struct{}
-	logger      logger.Logger
+	workers    []*ManagedWorker
+	registered map[string]struct{}
+	logger     logger.Logger
 }
 
 func NewOrchestrator(logger logger.Logger) *Orchestrator {
 	return &Orchestrator{
-		workers:     make([]*registeredWorker, 0),
-		workerNames: make(map[string]struct{}),
-		logger:      logger,
+		workers:    make([]*ManagedWorker, 0),
+		registered: make(map[string]struct{}),
+		logger:     logger,
 	}
 }
 
-func (s *Orchestrator) RegisterWorker(name string, worker Worker) {
-	if _, ok := s.workerNames[name]; ok {
-		s.logger.Warn("Worker %s already registered", name)
-		return
+func (s *Orchestrator) RegisterWorker(id string, worker Worker) error {
+	if _, ok := s.registered[id]; ok {
+		return fmt.Errorf("Worker %s already registered", id)
 	}
-	s.workerNames[name] = struct{}{}
+	s.registered[id] = struct{}{}
 
-	registeredWorker := &registeredWorker{
-		name:   name,
-		Worker: worker,
+	mw := &ManagedWorker{
+		id:     id,
+		worker: worker,
 	}
-	s.workers = append(s.workers, registeredWorker)
-	s.logger.Info("Registered worker %s", name)
+	s.workers = append(s.workers, mw)
+	s.logger.Info("Registered worker %s", id)
+	return nil
 }
 
 func (s *Orchestrator) StartAll() error {
-	for _, worker := range s.workers {
-		if err := worker.Start(); err != nil {
-			return fmt.Errorf("failed to start %s worker: %v", worker.name, err)
+	for _, mw := range s.workers {
+		if err := mw.worker.Start(); err != nil {
+			return err
 		}
-		s.logger.Info("Started worker %s", worker.name)
+		s.logger.Info("Started worker %s", mw.id)
 	}
 	return nil
 }
 
 func (s *Orchestrator) StopAll() error {
-	for _, worker := range s.workers {
-		if err := worker.Stop(); err != nil {
-			return fmt.Errorf("failed to stop %s worker: %v", worker.name, err)
+	for _, mw := range s.workers {
+		if err := mw.worker.Stop(); err != nil {
+			return err
 		}
-		s.logger.Info("Stopped worker %s", worker.name)
+		s.logger.Info("Stopped worker %s", mw.id)
 	}
 	return nil
 }

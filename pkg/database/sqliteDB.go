@@ -67,6 +67,14 @@ func (db *SqliteDB) Exec(query string, args ...any) error {
 	return nil
 }
 
+func (db *SqliteDB) ExecAffected(query string, args ...any) (int64, error) {
+	result, err := db.writeDB.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func (db *SqliteDB) ExecSQLFile(file string) error {
 	data, err := os.ReadFile(file)
 	if err != nil {
