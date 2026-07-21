@@ -8,10 +8,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type listCommand struct {
-	weatherService *usecase.WeatherService
-}
-
 func ListDefinition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "list",
@@ -20,28 +16,23 @@ func ListDefinition() *discordgo.ApplicationCommand {
 }
 
 func ListHandler(weatherService *usecase.WeatherService) interaction.HandleFunc {
-	c := &listCommand{
-		weatherService: weatherService,
-	}
-	return c.execute
-}
+	return func(_ *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+		views, err := weatherService.List(interaction.GetUserID(i))
+		if err != nil {
+			return nil, err
+		}
 
-func (c *listCommand) execute(_ *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	views, err := c.weatherService.List(interaction.GetUserID(i))
-	if err != nil {
-		return nil, err
-	}
+		if len(views) == 0 {
+			embed := presentation.NoticeEmbed("Invalid Request!", "You have no pinned locations.", presentation.Red)
+			return interaction.InitialResponse(
+				interaction.WithEmbeds(embed),
+				interaction.WithEphemeral(),
+			)
+		}
 
-	if len(views) == 0 {
-		embed := presentation.NoticeEmbed("No pins", "You have no pinned locations.", presentation.Red)
 		return interaction.InitialResponse(
-			interaction.WithEmbeds(embed),
+			interaction.WithEmbeds(presentation.PinsEmbed(views)),
 			interaction.WithEphemeral(),
 		)
 	}
-
-	return interaction.InitialResponse(
-		interaction.WithEmbeds(presentation.PinsEmbed(views)),
-		interaction.WithEphemeral(),
-	)
 }

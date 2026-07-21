@@ -23,28 +23,32 @@ func NoticeEmbed(title string, description string, color int) *discordgo.Message
 
 func WeatherEmbed(wv view.WeatherView) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       fmt.Sprintf("%s in %s", wv.Condition, wv.Location()),
-		Description: fmt.Sprintf("It currently feels like **%.0f°F**.", wv.FeelsLikeF),
+		Title:       fmt.Sprintf("%s", wv.Location()),
 		Color:       Blue,
 		Fields: []*discordgo.MessageEmbedField{
 			{
+				Name:   "🌀 Condition",
+				Value:  fmt.Sprintf("> `%s`", wv.Condition),
+				Inline: false,
+			},
+			{
 				Name:   "🌡️ Temperature",
-				Value:  fmt.Sprintf("%.0f°F", wv.TempF),
-				Inline: true,
+				Value:  fmt.Sprintf("> Actual: `%.0f°F` \n > Feels like: `%.0f°F`", wv.TempF, wv.FeelsLikeF),
+				Inline: false,
 			},
 			{
 				Name:   "⬆️ High / ⬇️ Low",
-				Value:  fmt.Sprintf("%.0f°F / %.0f°F", wv.HighF, wv.LowF),
-				Inline: true,
+				Value:  fmt.Sprintf("> `%.0f°F / %.0f°F`", wv.HighF, wv.LowF),
+				Inline: false,
 			},
 			{
 				Name:   "💧 Humidity",
-				Value:  fmt.Sprintf("%d%%", wv.Humidity),
-				Inline: true,
+				Value:  fmt.Sprintf("> `%d%%`", wv.Humidity),
+				Inline: false,
 			},
 			{
 				Name:   "💨 Wind",
-				Value:  fmt.Sprintf("%.0f mph %s", wv.WindMph, wv.WindDir),
+				Value:  fmt.Sprintf("> `%.0f mph %s`", wv.WindMph, wv.WindDir),
 				Inline: true,
 			},
 		},

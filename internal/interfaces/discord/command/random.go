@@ -9,10 +9,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type randomCommand struct {
-	weatherService *usecase.WeatherService
-}
-
 func RandomDefinition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "random",
@@ -21,20 +17,16 @@ func RandomDefinition() *discordgo.ApplicationCommand {
 }
 
 func RandomHandler(weatherService *usecase.WeatherService) interaction.HandleFunc {
-	c := &randomCommand{
-		weatherService: weatherService,
-	}
-	return c.execute
-}
+	return func(_ *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+		w, err := weatherService.Random()
+		if err != nil {
+			return nil, err
+		}
 
-func (c *randomCommand) execute(_ *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	w, err := c.weatherService.Random()
-	if err != nil {
-		return nil, err
+		return interaction.InitialResponse(
+			interaction.WithEmbeds(presentation.WeatherEmbed(w)),
+			interaction.WithComponents(component.RefreshDefinition()),
+			interaction.WithEphemeral(),
+		)
 	}
-
-	return interaction.InitialResponse(
-		interaction.WithEmbeds(presentation.WeatherEmbed(w)),
-		interaction.WithComponents(component.RefreshDefinition()),
-	)
 }

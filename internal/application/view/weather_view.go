@@ -44,9 +44,6 @@ func (v WeatherView) Location() string {
 	if v.State != "" {
 		place = fmt.Sprintf("%s, %s", v.City, v.State)
 	}
-	if v.Zip != "" {
-		return fmt.Sprintf("%s (%s)", place, v.Zip)
-	}
 	return place
 }
 

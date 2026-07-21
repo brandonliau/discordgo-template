@@ -11,10 +11,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type searchCommand struct {
-	weatherService *usecase.WeatherService
-}
-
 func SearchDefinition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "search",
@@ -33,31 +29,26 @@ func SearchDefinition() *discordgo.ApplicationCommand {
 }
 
 func SearchHandler(weatherService *usecase.WeatherService) interaction.HandleFunc {
-	c := &searchCommand{
-		weatherService: weatherService,
-	}
-	return c.execute
-}
+	return func(_ *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+		opts := interaction.ParseOptions(i)
+		zip := opts["zip"].StringValue()
 
-func (c *searchCommand) execute(_ *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	opts := interaction.ParseInteractionOptions(i)
-	zip := opts["zip"].StringValue()
-
-	w, err := c.weatherService.Search(zip)
-	switch {
-	case err == nil:
-		embed := presentation.WeatherEmbed(w)
-		return interaction.InitialResponse(
-			interaction.WithEmbeds(embed),
-			interaction.WithEphemeral(),
-		)
-	case errors.Is(err, usecase.ErrSearchZipInvalid):
-		embed := presentation.NoticeEmbed("Invalid zip", fmt.Sprintf("`%s` is not a valid US zip code.", zip), presentation.Red)
-		return interaction.InitialResponse(
-			interaction.WithEmbeds(embed),
-			interaction.WithEphemeral(),
-		)
-	default:
-		return nil, err
+		w, err := weatherService.Search(zip)
+		switch {
+		case err == nil:
+			embed := presentation.WeatherEmbed(w)
+			return interaction.InitialResponse(
+				interaction.WithEmbeds(embed),
+				interaction.WithEphemeral(),
+			)
+		case errors.Is(err, usecase.ErrSearchZipInvalid):
+			embed := presentation.NoticeEmbed("Invalid Request!", fmt.Sprintf("`%s` is not a valid US zip code.", zip), presentation.Red)
+			return interaction.InitialResponse(
+				interaction.WithEmbeds(embed),
+				interaction.WithEphemeral(),
+			)
+		default:
+			return nil, err
+		}
 	}
 }

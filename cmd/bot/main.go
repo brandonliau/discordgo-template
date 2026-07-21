@@ -93,6 +93,12 @@ func main() {
 		logger.Fatal("Failed to register component: %v", err)
 	}
 
+	// Sync commands with discord
+	err = discordGateway.Sync()
+	if err != nil {
+		logger.Fatal("Failed to sync commands: %v", err)
+	}
+
 	// Add event handlers
 	s.AddHandler(discordGateway.InteractionHandler)
 

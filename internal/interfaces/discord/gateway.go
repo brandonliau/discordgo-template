@@ -3,7 +3,7 @@ package discord
 import (
 	"fmt"
 	"strings"
-	
+
 	"discordgo-skeleton/internal/interfaces/discord/interaction"
 
 	"discordgo-skeleton/pkg/logger"
@@ -16,6 +16,7 @@ type gateway struct {
 	applicationID string
 	guildID       string
 	handleFuncs   map[string]interaction.HandleFunc
+	definitions   []*discordgo.ApplicationCommand
 	logger        logger.Logger
 }
 
@@ -52,12 +53,8 @@ func (g *gateway) RegisterCommand(c *discordgo.ApplicationCommand, handleFunc in
 		return fmt.Errorf("Command %s already registered", c.Name)
 	}
 
-	_, err := g.session.ApplicationCommandCreate(g.applicationID, "", c)
-	if err != nil {
-		return err
-	}
-
 	g.handleFuncs[c.Name] = handleFunc
+	g.definitions = append(g.definitions, c)
 	g.logger.Info("Registered command %s", c.Name)
 	return nil
 }
@@ -94,5 +91,14 @@ func (g *gateway) RegisterModal(modal *discordgo.InteractionResponseData, handle
 
 	g.handleFuncs[modal.CustomID] = handleFunc
 	g.logger.Info("Registered modal %s", modal.CustomID)
+	return nil
+}
+
+func (g *gateway) Sync() error {
+	_, err := g.session.ApplicationCommandBulkOverwrite(g.applicationID, g.guildID, g.definitions)
+	if err != nil {
+		return err
+	}
+	g.logger.Info("Synced %d commands with discord", len(g.definitions))
 	return nil
 }
